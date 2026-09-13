@@ -1,8 +1,9 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { createCustomerAccount } from '@/app/admin/sales/actions'
+import { formatPrice } from '@/lib/format-price'
 
 type Customer = { id: string; full_name: string; phone: string | null }
 type ProductResult = { id: string; sku: string; name: string; price: number; floor_price: number | null }
@@ -241,8 +242,8 @@ export default function SalesOrderPage() {
                 <button key={p.id} onClick={() => addToCart(p)} className="flex w-full items-center justify-between px-4 py-2 text-left text-sm hover:bg-canvas">
                   <span className="text-ink">{p.name}</span>
                   <span className="text-xs text-muted">
-                    List: Rp{p.price.toLocaleString('id-ID')}
-                    {p.floor_price !== null && <span className="ml-2 text-amber">Floor: Rp{p.floor_price.toLocaleString('id-ID')}</span>}
+                    List: {formatPrice(p.price)}
+                    {p.floor_price !== null && <span className="ml-2 text-amber">Floor: {formatPrice(p.floor_price)}</span>}
                   </span>
                 </button>
               ))}
@@ -270,7 +271,7 @@ export default function SalesOrderPage() {
                   <tr key={c.product_id}>
                     <td className="px-4 py-3 text-ink">
                       {c.name}
-                      {c.floor_price !== null && <p className="text-xs text-muted">Floor: Rp{c.floor_price.toLocaleString('id-ID')}</p>}
+                      {c.floor_price !== null && <p className="text-xs text-muted">Floor: {formatPrice(c.floor_price)}</p>}
                     </td>
                     <td className="px-4 py-3">
                       <input type="number" min={1} value={c.qty} onChange={(e) => updateCartItem(c.product_id, { qty: Number(e.target.value) })} className="w-16 rounded-md border border-line px-2 py-1" />
@@ -298,7 +299,7 @@ export default function SalesOrderPage() {
       {cart.length > 0 && (
         <div className="flex items-center justify-between rounded-lg border border-line bg-surface px-4 py-3">
           <span className="text-sm text-muted">Total</span>
-          <span className="font-display text-xl font-semibold text-ink">Rp{total.toLocaleString('id-ID')}</span>
+          <span className="font-display text-xl font-semibold text-ink">{formatPrice(total)}</span>
         </div>
       )}
 

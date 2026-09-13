@@ -1,9 +1,10 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import * as XLSX from 'xlsx'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
+import { formatPrice } from '@/lib/format-price'
 
 type OrderRow = { id: string; category: string; total: number; status: string; created_at: string }
 type ServiceRow = { id: string; status: string; created_at: string }
@@ -57,7 +58,7 @@ export default function ReportsPanel() {
       <div className="flex divide-x divide-line rounded-lg border border-line bg-surface">
         <div className="flex-1 px-6 py-5">
           <p className="text-sm text-muted">Total revenue</p>
-          <p className="font-display text-3xl font-semibold text-ink">Rp{totalRevenue.toLocaleString('id-ID')}</p>
+          <p className="font-display text-3xl font-semibold text-ink">{formatPrice(totalRevenue)}</p>
         </div>
         <div className="flex-1 px-6 py-5">
           <p className="text-sm text-muted">Total order</p>
@@ -79,7 +80,7 @@ export default function ReportsPanel() {
               <CartesianGrid stroke="#E2E5EA" vertical={false} />
               <XAxis dataKey="category" tick={{ fill: '#667085', fontSize: 12 }} axisLine={{ stroke: '#E2E5EA' }} tickLine={false} />
               <YAxis tick={{ fill: '#667085', fontSize: 12 }} axisLine={false} tickLine={false} />
-              <Tooltip formatter={(v: number) => `Rp${v.toLocaleString('id-ID')}`} />
+              <Tooltip formatter={(v: number) => formatPrice(v)} />
               <Bar dataKey="total" fill="#0F6E6E" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>

@@ -1,8 +1,9 @@
-'use client'
+﻿'use client'
 
 import { Fragment, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Pagination from '@/components/ui/Pagination'
+import { formatPrice } from '@/lib/format-price'
 
 type OrderItem = { id: string; product_id: string; serial_number_id: string | null; qty: number; price: number; products: { name: string } | null }
 type Order = { id: string; status: string; total: number; created_at: string; users: { full_name: string } | null; order_items: OrderItem[] }
@@ -107,7 +108,7 @@ export default function OrderTable({ category }: { category: 'retail' | 'equipme
                     <tr onClick={() => toggleExpand(o)} className="cursor-pointer hover:bg-canvas">
                       <td className="px-4 py-3 text-muted">#{o.id.slice(0, 8)}</td>
                       <td className="px-4 py-3 text-ink">{o.users?.full_name ?? '-'}</td>
-                      <td className="px-4 py-3 text-ink">Rp{o.total.toLocaleString('id-ID')}</td>
+                      <td className="px-4 py-3 text-ink">{formatPrice(o.total)}</td>
                       <td className="px-4 py-3">
                         <select value={o.status} onClick={(e) => e.stopPropagation()} onChange={(e) => updateStatus(o.id, e.target.value)}
                           className={`rounded-md border border-line bg-surface px-2 py-1 text-xs font-medium ${statusStyle[o.status]}`}>
@@ -124,7 +125,7 @@ export default function OrderTable({ category }: { category: 'retail' | 'equipme
                               <div key={item.id} className="flex items-center justify-between rounded-md border border-line bg-surface px-3 py-2 text-sm">
                                 <div>
                                   <p className="text-ink">{item.products?.name}</p>
-                                  <p className="text-xs text-muted">{item.qty} x Rp{item.price.toLocaleString('id-ID')}</p>
+                                  <p className="text-xs text-muted">{item.qty} x {formatPrice(item.price)}</p>
                                 </div>
                                 {category === 'equipment' && (
                                   item.serial_number_id ? (

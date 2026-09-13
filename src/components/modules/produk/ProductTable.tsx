@@ -1,8 +1,9 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Pagination from '@/components/ui/Pagination'
+import { formatPrice } from '@/lib/format-price'
 
 type Product = {
   id: string; sku: string; name: string; description: string | null
@@ -133,8 +134,8 @@ export default function ProductTable({ category }: { category: 'retail' | 'equip
                     </td>
                     <td className="px-4 py-3 text-muted">{p.sku}</td>
                     <td className="px-4 py-3 text-ink">{p.name}</td>
-                    <td className="px-4 py-3 text-ink">Rp{p.price.toLocaleString('id-ID')}</td>
-                    <td className="px-4 py-3 text-amber">{floorPrices[p.id] !== undefined ? `Rp${floorPrices[p.id].toLocaleString('id-ID')}` : '-'}</td>
+                    <td className="px-4 py-3 text-ink">{formatPrice(p.price)}</td>
+                    <td className="px-4 py-3 text-amber">{floorPrices[p.id] !== undefined ? formatPrice(floorPrices[p.id]) : '-'}</td>
                     <td className="px-4 py-3">
                       {category === 'retail' ? (
                         <span className={p.stock_qty <= p.low_stock_threshold ? 'text-amber' : 'text-ink'}>{p.stock_qty} {p.unit}</span>

@@ -1,5 +1,6 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { formatPrice } from '@/lib/format-price'
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -33,7 +34,7 @@ export default async function HomePage() {
       <section className="mx-auto max-w-6xl px-6 py-20 text-center">
         <p className="mb-3 text-sm font-medium text-primary">Distribusi Retail &amp; Equipment</p>
         <h1 className="font-display text-4xl font-semibold leading-tight text-ink md:text-5xl">
-          Kebutuhan Retail, Equipment,<br /> dan Service Dapur — Satu Tempat
+          Kebutuhan Retail, Equipment,<br /> dan Service Dapur â€” Satu Tempat
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-base text-muted">
           BUANA menyediakan produk food &amp; beverage, equipment refrigeration dari brand terpercaya,
@@ -53,17 +54,17 @@ export default async function HomePage() {
       <section className="mx-auto max-w-6xl px-6 py-12">
         <div className="grid gap-4 md:grid-cols-3">
           <div className="rounded-lg border border-line bg-surface p-6">
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-primary-light text-primary">🛒</div>
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-primary-light text-primary">ðŸ›’</div>
             <p className="font-medium text-ink">Retail Food &amp; Beverage</p>
             <p className="mt-1 text-sm text-muted">Produk food &amp; ingredients siap kirim ke lokasi bisnis Anda.</p>
           </div>
           <div className="rounded-lg border border-line bg-surface p-6">
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-primary-light text-primary">❄️</div>
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-primary-light text-primary">â„ï¸</div>
             <p className="font-medium text-ink">Equipment Refrigeration</p>
             <p className="mt-1 text-sm text-muted">Chiller, freezer, dan equipment dari Bromic &amp; True Refrigeration.</p>
           </div>
           <div className="rounded-lg border border-line bg-surface p-6">
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-primary-light text-primary">🔧</div>
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-primary-light text-primary">ðŸ”§</div>
             <p className="font-medium text-ink">Service &amp; Maintenance</p>
             <p className="mt-1 text-sm text-muted">Teknisi berpengalaman datang langsung ke lokasi Anda.</p>
           </div>
@@ -73,7 +74,7 @@ export default async function HomePage() {
       {/* Produk Pilihan */}
       <section id="produk" className="mx-auto max-w-6xl px-6 py-12">
         <h2 className="mb-1 font-display text-2xl font-semibold text-ink">Produk Terbaru</h2>
-        <p className="mb-6 text-sm text-muted">Sebagian produk yang tersedia — download aplikasi untuk katalog lengkap.</p>
+        <p className="mb-6 text-sm text-muted">Sebagian produk yang tersedia â€” download aplikasi untuk katalog lengkap.</p>
 
         <p className="mb-3 text-sm font-medium text-ink">Retail</p>
         <div className="mb-8 grid gap-4 sm:grid-cols-2 md:grid-cols-4">
@@ -84,11 +85,11 @@ export default async function HomePage() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={p.image_url} alt={p.name} className="h-full w-full rounded-md object-cover" />
                 ) : (
-                  <span className="text-2xl">📦</span>
+                  <span className="text-2xl">ðŸ“¦</span>
                 )}
               </div>
               <p className="text-sm text-ink">{p.name}</p>
-              <p className="mt-1 text-sm font-medium text-ink">Rp{Number(p.price).toLocaleString('id-ID')}</p>
+              <p className="mt-1 text-sm font-medium text-ink">{formatPrice(Number(p.price))}</p>
             </div>
           ))}
           {retailProducts.length === 0 && <p className="text-sm text-muted">Belum ada produk retail.</p>}
@@ -103,12 +104,12 @@ export default async function HomePage() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={p.image_url} alt={p.name} className="h-full w-full rounded-md object-cover" />
                 ) : (
-                  <span className="text-2xl">❄️</span>
+                  <span className="text-2xl">â„ï¸</span>
                 )}
               </div>
               {p.brand && <p className="text-xs text-muted">{p.brand}</p>}
               <p className="text-sm text-ink">{p.name}</p>
-              <p className="mt-1 text-sm font-medium text-ink">Rp{Number(p.price).toLocaleString('id-ID')}</p>
+              <p className="mt-1 text-sm font-medium text-ink">{formatPrice(Number(p.price))}</p>
             </div>
           ))}
           {equipmentProducts.length === 0 && <p className="text-sm text-muted">Belum ada produk equipment.</p>}
@@ -120,10 +121,10 @@ export default async function HomePage() {
         <h2 className="mb-6 font-display text-2xl font-semibold text-ink">Kenapa BUANA</h2>
         <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-4">
           {[
-            { icon: '📍', title: 'Tracking Real-Time', desc: 'Pantau posisi kurir & teknisi secara live.' },
-            { icon: '🛡️', title: 'Garansi Resmi', desc: 'Semua unit equipment tercatat dengan garansi jelas.' },
-            { icon: '📅', title: 'Booking Fleksibel', desc: 'Ajukan service kapan saja lewat aplikasi.' },
-            { icon: '🚚', title: 'Pengiriman Terpercaya', desc: 'Tim kurir & armada siap antar pesanan Anda.' },
+            { icon: 'ðŸ“', title: 'Tracking Real-Time', desc: 'Pantau posisi kurir & teknisi secara live.' },
+            { icon: 'ðŸ›¡ï¸', title: 'Garansi Resmi', desc: 'Semua unit equipment tercatat dengan garansi jelas.' },
+            { icon: 'ðŸ“…', title: 'Booking Fleksibel', desc: 'Ajukan service kapan saja lewat aplikasi.' },
+            { icon: 'ðŸšš', title: 'Pengiriman Terpercaya', desc: 'Tim kurir & armada siap antar pesanan Anda.' },
           ].map((f) => (
             <div key={f.title}>
               <div className="mb-2 text-2xl">{f.icon}</div>
@@ -137,7 +138,7 @@ export default async function HomePage() {
       {/* Footer */}
       <footer id="kontak" className="border-t border-line bg-surface">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 text-sm text-muted md:flex-row">
-          <p>© {new Date().getFullYear()} BUANA. Semua hak dilindungi.</p>
+          <p>Â© {new Date().getFullYear()} BUANA. Semua hak dilindungi.</p>
           <div className="flex gap-4">
             <Link href="/privacy" className="hover:text-ink">Kebijakan Privasi</Link>
             <Link href="/login" className="hover:text-ink">Login Staff</Link>

@@ -1,8 +1,9 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Pagination from '@/components/ui/Pagination'
+import { formatPrice } from '@/lib/format-price'
 
 type Log = { id: string; note: string | null; parts_used: string | null; cost: number; created_at: string }
 type ServiceRequest = {
@@ -88,7 +89,7 @@ export default function ServiceHistoryTable() {
                           <div key={log.id} className="rounded-md border border-line bg-surface px-3 py-2 text-sm">
                             <p className="text-ink">{log.note ?? 'Tidak ada catatan'}</p>
                             {log.parts_used && <p className="text-xs text-muted">Part dipakai: {log.parts_used}</p>}
-                            <p className="text-xs text-muted">Rp{log.cost.toLocaleString('id-ID')} pada {new Date(log.created_at).toLocaleDateString('id-ID')}</p>
+                            <p className="text-xs text-muted">{formatPrice(log.cost)} pada {new Date(log.created_at).toLocaleDateString('id-ID')}</p>
                           </div>
                         ))}
                       </div>
