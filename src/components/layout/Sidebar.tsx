@@ -41,7 +41,7 @@ export default function Sidebar() {
   return (
     <aside className="w-64 shrink-0 border-r border-line bg-surface px-4 py-6">
       <div className="mb-8 px-2">
-        <p className="font-display text-lg font-semibold text-ink">Ops Panel</p>
+        <p className="font-display text-lg font-semibold text-ink">Buana Panel</p>
       </div>
       <nav className="space-y-6">
         {groups.map((group) => (
