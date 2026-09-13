@@ -15,7 +15,7 @@ export default function PrivacyPolicyPage() {
       </p>
 
       <p className="mb-4">
-        Aplikasi ini dioperasikan oleh <strong>[NAMA PERUSAHAAN/KLIEN]</strong> dan
+        Aplikasi ini dioperasikan oleh <strong>PT.BUANA</strong> dan
         dikembangkan serta didukung secara teknis oleh{' '}
         <strong>PT RHG Teknologi Indonesia</strong> sebagai vendor teknologi.
         Kebijakan Privasi ini menjelaskan bagaimana data pribadi pengguna
@@ -162,12 +162,12 @@ export default function PrivacyPolicyPage() {
       <div className="space-y-1">
         <p>
           Pengelola Aplikasi:{' '}
-          <strong>[NAMA PERUSAHAAN/KLIEN]</strong>
+          <strong>PT.BUANA</strong>
         </p>
 
         <p>
           Email Pengelola:{' '}
-          <strong>[EMAIL PERUSAHAAN/KLIEN]</strong>
+          <strong>info@buana.id</strong>
         </p>
 
         <p>
@@ -177,7 +177,7 @@ export default function PrivacyPolicyPage() {
 
         <p>
           Email Vendor:{' '}
-          <strong>[EMAIL RHG]</strong>
+          <strong>info@rhgteknologiindonesia.id</strong>
         </p>
       </div>
     </div>
