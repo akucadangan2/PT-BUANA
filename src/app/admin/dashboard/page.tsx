@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
+import StokMenipisCard from '@/components/modules/dashboard/StokMenipisCard'
 
-type LowStockItem = { id: string; name: string; displayQty: number }
+type LowStockItem = { id: string; name: string; category: 'retail' | 'equipment'; displayQty: number; threshold: number }
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -25,11 +26,11 @@ export default async function DashboardPage() {
 
   const retailLowStock: LowStockItem[] = (retailProductsRes.data ?? [])
     .filter((p) => p.stock_qty <= p.low_stock_threshold)
-    .map((p) => ({ id: p.id, name: p.name, displayQty: p.stock_qty }))
+    .map((p) => ({ id: p.id, name: p.name, category: 'retail', displayQty: p.stock_qty, threshold: p.low_stock_threshold }))
 
   const equipmentLowStock: LowStockItem[] = (equipmentProductsRes.data ?? [])
     .filter((p) => (availableCountByProduct[p.id] ?? 0) <= p.low_stock_threshold)
-    .map((p) => ({ id: p.id, name: p.name, displayQty: availableCountByProduct[p.id] ?? 0 }))
+    .map((p) => ({ id: p.id, name: p.name, category: 'equipment', displayQty: availableCountByProduct[p.id] ?? 0, threshold: p.low_stock_threshold }))
 
   const lowStockItems: LowStockItem[] = [...retailLowStock, ...equipmentLowStock]
   const serviceToday = serviceTodayRes.data ?? []
@@ -57,18 +58,8 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-8">
-        <div>
-          <h2 className="mb-3 font-medium text-ink">Stok menipis</h2>
-          <div className="divide-y divide-line rounded-lg border border-line bg-surface">
-            {lowStockItems.map((p) => (
-              <div key={p.id} className="flex items-center justify-between px-4 py-3 text-sm">
-                <span className="text-ink">{p.name}</span>
-                <span className="text-amber">{p.displayQty} unit</span>
-              </div>
-            ))}
-            {lowStockItems.length === 0 && <p className="px-4 py-3 text-sm text-muted">Aman, gak ada stok menipis</p>}
-          </div>
-        </div>
+        <StokMenipisCard items={lowStockItems} />
+
         <div>
           <h2 className="mb-3 font-medium text-ink">Jadwal service hari ini</h2>
           <div className="divide-y divide-line rounded-lg border border-line bg-surface">
