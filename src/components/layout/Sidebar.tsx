@@ -3,41 +3,57 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-const groups = [
-  { label: 'Utama', items: [{ label: 'Dashboard', href: '/admin/dashboard' }] },
-  {
-    label: 'Produk & stok',
-    items: [
-      { label: 'Produk retail', href: '/admin/produk/retail' },
-      { label: 'Produk equipment', href: '/admin/produk/equipment' },
-      { label: 'Serial number', href: '/admin/serial-number' },
-      { label: 'Stok opname', href: '/admin/stok/opname' },
-      { label: 'Riwayat stok', href: '/admin/stok/movement' },
-    ],
-  },
-  {
-    label: 'Transaksi',
-    items: [
-      { label: 'Order retail', href: '/admin/order/retail' },
-      { label: 'Order equipment', href: '/admin/order/equipment' },
-      { label: 'Delivery', href: '/admin/delivery' },
-    ],
-  },
-  {
-    label: 'Service',
-    items: [
-      { label: 'Booking masuk', href: '/admin/service/booking' },
-      { label: 'Assign teknisi', href: '/admin/service/assign' },
-      { label: 'Riwayat service', href: '/admin/service/riwayat' },
-      { label: 'Warranty', href: '/admin/warranty' },
-    ],
-  },
-  { label: 'Sales', items: [{ label: 'Buat Order', href: '/admin/sales' }] },
-  { label: 'Lainnya', items: [{ label: 'Laporan', href: '/admin/laporan' }, { label: 'User', href: '/admin/user' }] },
-]
+type Badges = {
+  retailPending: number
+  equipmentPending: number
+  serviceRequested: number
+}
 
-export default function Sidebar() {
+function buildGroups(badges: Badges) {
+  return [
+    { label: 'Utama', items: [{ label: 'Dashboard', href: '/admin/dashboard', badge: 0 }] },
+    {
+      label: 'Produk & stok',
+      items: [
+        { label: 'Produk retail', href: '/admin/produk/retail', badge: 0 },
+        { label: 'Produk equipment', href: '/admin/produk/equipment', badge: 0 },
+        { label: 'Serial number', href: '/admin/serial-number', badge: 0 },
+        { label: 'Stok opname', href: '/admin/stok/opname', badge: 0 },
+        { label: 'Riwayat stok', href: '/admin/stok/movement', badge: 0 },
+      ],
+    },
+    {
+      label: 'Transaksi',
+      items: [
+        { label: 'Order retail', href: '/admin/order/retail', badge: badges.retailPending },
+        { label: 'Order equipment', href: '/admin/order/equipment', badge: badges.equipmentPending },
+        { label: 'Delivery', href: '/admin/delivery', badge: 0 },
+      ],
+    },
+    {
+      label: 'Service',
+      items: [
+        { label: 'Booking masuk', href: '/admin/service/booking', badge: badges.serviceRequested },
+        { label: 'Assign teknisi', href: '/admin/service/assign', badge: 0 },
+        { label: 'Riwayat service', href: '/admin/service/riwayat', badge: 0 },
+        { label: 'Warranty', href: '/admin/warranty', badge: 0 },
+      ],
+    },
+    { label: 'Sales', items: [{ label: 'Buat Order', href: '/admin/sales', badge: 0 }] },
+    {
+      label: 'Lainnya',
+      items: [
+        { label: 'Laporan', href: '/admin/laporan', badge: 0 },
+        { label: 'User', href: '/admin/user', badge: 0 },
+      ],
+    },
+  ]
+}
+
+export default function Sidebar({ badges }: { badges: Badges }) {
   const pathname = usePathname()
+  const groups = buildGroups(badges)
+
   return (
     <aside className="w-64 shrink-0 border-r border-line bg-surface px-4 py-6">
       <div className="mb-8 px-2">
@@ -54,11 +70,16 @@ export default function Sidebar() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`block rounded-md px-2 py-1.5 text-sm transition-colors ${
+                    className={`flex items-center justify-between rounded-md px-2 py-1.5 text-sm transition-colors ${
                       active ? 'bg-primary-light font-medium text-primary' : 'text-ink/80 hover:bg-canvas'
                     }`}
                   >
-                    {item.label}
+                    <span>{item.label}</span>
+                    {item.badge > 0 && (
+                      <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-amber px-1.5 text-[11px] font-semibold text-white">
+                        {item.badge}
+                      </span>
+                    )}
                   </Link>
                 )
               })}
