@@ -20,15 +20,10 @@ export default function UserTable() {
 
   async function load() {
     setLoading(true)
-    const { data: sessionData } = await supabase.auth.getUser()
-    console.log('CURRENT USER (client-side):', sessionData?.user?.id, sessionData?.user?.email)
-
-    const { data, error, status, statusText } = await supabase
+    const { data, error } = await supabase
       .from('users')
       .select('id, full_name, role, phone')
       .order('full_name')
-
-    console.log('USERS QUERY RESULT:', { data, error, status, statusText })
 
     if (error) setError(error.message)
     setUsers(data ?? [])
