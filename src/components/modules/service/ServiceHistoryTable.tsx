@@ -32,7 +32,7 @@ export default function ServiceHistoryTable() {
     const to = from + pageSize - 1
     let query = supabase
       .from('service_requests')
-      .select('id, complaint, status, users(full_name), service_logs(id, note, parts_used, cost, created_at)', { count: 'exact' })
+      .select('id, complaint, status, users!customer_id(full_name), service_logs(id, note, parts_used, cost, created_at)')
       .order('created_at', { ascending: false })
       .range(from, to)
     if (statusFilter !== 'all') query = query.eq('status', statusFilter)

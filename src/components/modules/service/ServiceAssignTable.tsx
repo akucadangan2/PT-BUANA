@@ -16,7 +16,7 @@ export default function ServiceAssignTable() {
   async function load() {
     setLoading(true)
     const [reqRes, techRes] = await Promise.all([
-      supabase.from('service_requests').select('id, complaint, location_address, users(full_name)').eq('status', 'requested').order('created_at'),
+      supabase.from('service_requests').select('id, complaint, location_address, users!customer_id(full_name)').eq('status', 'requested').order('created_at'),
       supabase.from('users').select('id, full_name').eq('role', 'teknisi'),
     ])
     setItems((reqRes.data as any) ?? [])

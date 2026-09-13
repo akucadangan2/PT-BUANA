@@ -17,7 +17,7 @@ export default function ServiceBookingTable() {
     setLoading(true)
     const { data } = await supabase
       .from('service_requests')
-      .select('id, complaint, location_address, created_at, users(full_name)')
+      .select('id, complaint, location_address, created_at, users!customer_id(full_name)')
       .eq('status', 'requested')
       .order('created_at', { ascending: false })
     setItems((data as any) ?? [])
