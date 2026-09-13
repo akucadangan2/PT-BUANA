@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 
+type LowStockItem = { id: string; name: string; displayQty: number }
+
 export default async function DashboardPage() {
   const supabase = await createClient()
   const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0)
@@ -15,12 +17,22 @@ export default async function DashboardPage() {
   ])
 
   const pendingOrders = pendingOrdersRes.count ?? 0
-  const retailLowStock = (retailProductsRes.data ?? []).filter((p) => p.stock_qty <= p.low_stock_threshold)
+
   const availableCountByProduct: Record<string, number> = {}
-  for (const sn of serialNumbersRes.data ?? []) availableCountByProduct[sn.product_id] = (availableCountByProduct[sn.product_id] ?? 0) + 1
-  const equipmentLowStock = (equipmentProductsRes.data ?? []).filter((p) => (availableCountByProduct[p.id] ?? 0) <= p.low_stock_threshold)
+  for (const sn of serialNumbersRes.data ?? []) {
+    availableCountByProduct[sn.product_id] = (availableCountByProduct[sn.product_id] ?? 0) + 1
+  }
+
+  const retailLowStock: LowStockItem[] = (retailProductsRes.data ?? [])
+    .filter((p) => p.stock_qty <= p.low_stock_threshold)
+    .map((p) => ({ id: p.id, name: p.name, displayQty: p.stock_qty }))
+
+  const equipmentLowStock: LowStockItem[] = (equipmentProductsRes.data ?? [])
+    .filter((p) => (availableCountByProduct[p.id] ?? 0) <= p.low_stock_threshold)
+    .map((p) => ({ id: p.id, name: p.name, displayQty: availableCountByProduct[p.id] ?? 0 }))
+
+  const lowStockItems: LowStockItem[] = [...retailLowStock, ...equipmentLowStock]
   const serviceToday = serviceTodayRes.data ?? []
-  const lowStockItems = [...retailLowStock, ...equipmentLowStock]
 
   return (
     <div className="space-y-10">
@@ -51,7 +63,7 @@ export default async function DashboardPage() {
             {lowStockItems.map((p) => (
               <div key={p.id} className="flex items-center justify-between px-4 py-3 text-sm">
                 <span className="text-ink">{p.name}</span>
-                <span className="text-amber">{'stock_qty' in p ? p.stock_qty : availableCountByProduct[p.id] ?? 0} unit</span>
+                <span className="text-amber">{p.displayQty} unit</span>
               </div>
             ))}
             {lowStockItems.length === 0 && <p className="px-4 py-3 text-sm text-muted">Aman, gak ada stok menipis</p>}
