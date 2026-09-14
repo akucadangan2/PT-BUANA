@@ -33,7 +33,7 @@ export default function LoginPage() {
     e.preventDefault()
 
     if (!email.trim() || !password.trim()) {
-      setError('Email dan password wajib diisi.')
+      setError('Email and password are required.')
       return
     }
 
@@ -50,11 +50,13 @@ export default function LoginPage() {
 
       if (error) {
         if (error.message.toLowerCase().includes('invalid login')) {
-          setError('Email atau password yang Anda masukkan salah.')
-        } else if (error.message.toLowerCase().includes('email not confirmed')) {
-          setError('Email belum dikonfirmasi.')
+          setError('The email or password you entered is incorrect.')
+        } else if (
+          error.message.toLowerCase().includes('email not confirmed')
+        ) {
+          setError('Your email address has not been confirmed.')
         } else {
-          setError('Gagal masuk. Silakan coba kembali.')
+          setError('Unable to sign in. Please try again.')
         }
 
         return
@@ -63,7 +65,9 @@ export default function LoginPage() {
       router.replace('/admin/dashboard')
       router.refresh()
     } catch {
-      setError('Terjadi gangguan. Periksa koneksi internet Anda.')
+      setError(
+        'Something went wrong. Please check your internet connection.'
+      )
     } finally {
       setLoading(false)
     }
@@ -102,15 +106,16 @@ export default function LoginPage() {
               </div>
 
               <h1 className="mt-8 max-w-md font-display text-4xl font-semibold leading-tight tracking-tight">
-                Kelola operasional
+                Manage your operations
                 <span className="block text-white/50">
-                  dalam satu dashboard.
+                  from one central dashboard.
                 </span>
               </h1>
 
               <p className="mt-5 max-w-md text-sm leading-6 text-white/50">
-                Pantau pesanan, pelanggan, produk, booking service, pengiriman,
-                dan aktivitas operasional Buana secara terpusat.
+                Manage orders, customers, products, service bookings,
+                deliveries and day-to-day Buana operations from one
+                centralised dashboard.
               </p>
             </div>
 
@@ -141,6 +146,7 @@ export default function LoginPage() {
 
                 <div className="pixel-worker">
                   <div className="worker-hat" />
+
                   <div className="worker-head">
                     <div className="worker-eye" />
                     <div className="worker-nose" />
@@ -149,6 +155,7 @@ export default function LoginPage() {
                   <div className="worker-body" />
 
                   <div className="worker-arm worker-arm-left" />
+
                   <div className="worker-arm worker-arm-right">
                     <div className="wrench">
                       <div className="wrench-head" />
@@ -181,6 +188,7 @@ export default function LoginPage() {
           {/* RIGHT / LOGIN */}
           <section className="flex min-h-[650px] items-center justify-center p-6 sm:p-10 lg:p-14">
             <div className="w-full max-w-[420px]">
+
               {/* Mobile Logo */}
               <div className="mb-10 lg:hidden">
                 <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-lg font-bold text-white shadow-sm">
@@ -198,16 +206,17 @@ export default function LoginPage() {
                 </p>
 
                 <h2 className="font-display text-3xl font-semibold tracking-tight text-ink">
-                  Selamat datang kembali
+                  Welcome back
                 </h2>
 
                 <p className="mt-2 text-sm leading-6 text-muted">
-                  Masuk menggunakan akun administrator untuk melanjutkan ke
-                  dashboard operasional.
+                  Sign in with your administrator account to access the
+                  operations dashboard.
                 </p>
               </div>
 
               <form onSubmit={handleLogin} className="space-y-5">
+
                 {/* ERROR */}
                 {error && (
                   <div
@@ -291,7 +300,7 @@ export default function LoginPage() {
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Masukkan password"
+                      placeholder="Enter your password"
                       autoComplete="current-password"
                       disabled={loading}
                       required
@@ -304,8 +313,8 @@ export default function LoginPage() {
                       disabled={loading}
                       aria-label={
                         showPassword
-                          ? 'Sembunyikan password'
-                          : 'Tampilkan password'
+                          ? 'Hide password'
+                          : 'Show password'
                       }
                       className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-muted transition-colors hover:text-ink disabled:cursor-not-allowed"
                     >
@@ -349,11 +358,11 @@ export default function LoginPage() {
                   {loading ? (
                     <span className="flex items-center gap-2">
                       <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                      Memverifikasi akun...
+                      Verifying account...
                     </span>
                   ) : (
                     <span className="flex items-center gap-2">
-                      Masuk ke Dashboard
+                      Sign in to Dashboard
 
                       <svg
                         className="transition-transform group-hover:translate-x-1"
@@ -385,7 +394,7 @@ export default function LoginPage() {
                   <path d="m9 12 2 2 4-4" />
                 </svg>
 
-                <span>Koneksi terenkripsi & akses terbatas</span>
+                <span>Encrypted connection & restricted access</span>
               </div>
             </div>
           </section>
