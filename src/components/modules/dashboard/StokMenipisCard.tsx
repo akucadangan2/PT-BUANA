@@ -20,19 +20,19 @@ export default function StokMenipisCard({ items }: { items: LowStockItem[] }) {
         className="w-full rounded-lg border border-line bg-surface p-4 text-left transition-colors hover:border-primary"
       >
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-medium text-ink">Stok menipis</h2>
-          <span className="text-xs text-primary underline underline-offset-2">Lihat detail</span>
+          <h2 className="font-medium text-ink">Low Stock</h2>
+          <span className="text-xs text-primary underline underline-offset-2">View details</span>
         </div>
 
         {items.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted">Aman, gak ada stok menipis</p>
+          <p className="py-8 text-center text-sm text-muted">All good, no low stock items</p>
         ) : (
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={chartData} layout="vertical" margin={{ left: 0, right: 16, top: 4, bottom: 4 }}>
               <XAxis type="number" hide />
               <YAxis type="category" dataKey="name" width={100} tick={{ fill: '#667085', fontSize: 11 }} axisLine={false} tickLine={false} />
               <Tooltip
-                formatter={(value: number, _name, entry) => [`${value} unit`, entry.payload.full]}
+                formatter={(value: number, _name, entry) => [`${value} units`, entry.payload.full]}
                 cursor={{ fill: '#F7F8FA' }}
               />
               <Bar dataKey="qty" radius={[0, 4, 4, 0]} barSize={14}>
@@ -52,17 +52,17 @@ export default function StokMenipisCard({ items }: { items: LowStockItem[] }) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-line px-5 py-4">
-              <h3 className="font-display font-semibold text-ink">Semua Stok Menipis ({items.length})</h3>
+              <h3 className="font-display font-semibold text-ink">All Low Stock Items ({items.length})</h3>
               <button onClick={() => setOpen(false)} className="text-muted hover:text-ink">✕</button>
             </div>
             <div className="max-h-[60vh] overflow-y-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-line bg-canvas text-left text-muted">
-                    <th className="px-5 py-2 font-normal">Produk</th>
-                    <th className="px-5 py-2 font-normal">Kategori</th>
-                    <th className="px-5 py-2 font-normal">Tersedia</th>
-                    <th className="px-5 py-2 font-normal">Ambang</th>
+                    <th className="px-5 py-2 font-normal">Product</th>
+                    <th className="px-5 py-2 font-normal">Category</th>
+                    <th className="px-5 py-2 font-normal">Available</th>
+                    <th className="px-5 py-2 font-normal">Threshold</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">

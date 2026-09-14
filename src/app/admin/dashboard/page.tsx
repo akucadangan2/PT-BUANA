@@ -20,7 +20,7 @@ type ServiceTodayItem = {
 }
 
 function formatTime(dateString: string) {
-  return new Intl.DateTimeFormat('id-ID', {
+  return new Intl.DateTimeFormat('en-AU', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
@@ -29,7 +29,7 @@ function formatTime(dateString: string) {
 }
 
 function formatToday() {
-  return new Intl.DateTimeFormat('id-ID', {
+  return new Intl.DateTimeFormat('en-AU', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -101,7 +101,7 @@ export default async function DashboardPage() {
       <section className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
         <div>
           <h1 className="font-display text-2xl font-semibold text-ink">Dashboard</h1>
-          <p className="mt-1 text-sm text-muted">Ringkasan operasional Buana untuk {formatToday()}</p>
+          <p className="mt-1 text-sm text-muted">Buana operations summary for {formatToday()}</p>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -110,24 +110,24 @@ export default async function DashboardPage() {
             className="inline-flex items-center gap-2 rounded-md border border-line bg-surface px-4 py-2.5 text-sm font-medium text-ink transition hover:bg-canvas"
           >
             <ClipboardList size={16} />
-            Lihat Order
+            View Orders
           </Link>
           <Link
             href="/admin/service/booking"
             className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
           >
             <Wrench size={16} />
-            Kelola Service
+            Manage Service
           </Link>
         </div>
       </section>
 
       {/* SUMMARY CARDS */}
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard label="Order Pending" value={pendingOrders} helper="Menunggu diproses" tone={pendingOrders > 0 ? 'amber' : 'default'} icon={<Clock size={20} />} />
-        <SummaryCard label="Sedang Diproses" value={processingOrders} helper="Order aktif" icon={<Package size={20} />} />
-        <SummaryCard label="Stok Menipis" value={lowStockItems.length} helper="Perlu perhatian" tone={lowStockItems.length > 0 ? 'amber' : 'default'} icon={<AlertTriangle size={20} />} />
-        <SummaryCard label="Service Hari Ini" value={serviceToday.length} helper={`${completedToday} order selesai hari ini`} icon={<Calendar size={20} />} />
+        <SummaryCard label="Pending Orders" value={pendingOrders} helper="Awaiting processing" tone={pendingOrders > 0 ? 'amber' : 'default'} icon={<Clock size={20} />} />
+        <SummaryCard label="Processing" value={processingOrders} helper="Active orders" icon={<Package size={20} />} />
+        <SummaryCard label="Low Stock" value={lowStockItems.length} helper="Needs attention" tone={lowStockItems.length > 0 ? 'amber' : 'default'} icon={<AlertTriangle size={20} />} />
+        <SummaryCard label="Today's Service" value={serviceToday.length} helper={`${completedToday} orders completed today`} icon={<Calendar size={20} />} />
       </section>
 
       {/* OPERATIONAL STATUS */}
@@ -135,20 +135,20 @@ export default async function DashboardPage() {
         <div className="rounded-lg border border-line bg-surface p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-medium text-ink">Status operasional</p>
+              <p className="text-sm font-medium text-ink">Operational Status</p>
               <p className="mt-1 text-sm text-muted">
-                {operationalIssues > 0 ? 'Ada beberapa aktivitas yang membutuhkan perhatian.' : 'Semua aktivitas operasional dalam kondisi normal.'}
+                {operationalIssues > 0 ? 'Some activities need your attention.' : 'All operations are running normally.'}
               </p>
             </div>
             <div className={`inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium ${operationalIssues > 0 ? 'bg-amber-light text-amber' : 'bg-success/10 text-success'}`}>
               <span className={`h-2 w-2 rounded-full ${operationalIssues > 0 ? 'bg-amber' : 'bg-success'}`} />
-              {operationalIssues > 0 ? `${operationalIssues} perhatian` : 'Normal'}
+              {operationalIssues > 0 ? `${operationalIssues} issues` : 'Normal'}
             </div>
           </div>
         </div>
 
         <div className="rounded-lg border border-line bg-surface p-5">
-          <p className="text-sm text-muted">Selesai hari ini</p>
+          <p className="text-sm text-muted">Completed Today</p>
           <div className="mt-2 flex items-end justify-between">
             <p className="font-display text-3xl font-semibold text-ink">{completedToday}</p>
             <div className="rounded-md bg-success/10 p-2 text-success">
@@ -164,11 +164,11 @@ export default async function DashboardPage() {
         <div className="min-w-0">
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <h2 className="font-display text-lg font-semibold text-ink">Stok menipis</h2>
-              <p className="mt-0.5 text-xs text-muted">Produk yang sudah mencapai batas minimum stok</p>
+              <h2 className="font-display text-lg font-semibold text-ink">Low Stock</h2>
+              <p className="mt-0.5 text-xs text-muted">Products that have reached minimum stock level</p>
             </div>
             <Link href="/admin/produk/retail" className="text-xs font-medium text-primary hover:opacity-70">
-              Kelola produk
+              Manage Products
             </Link>
           </div>
           <StokMenipisCard items={lowStockItems} />
@@ -178,11 +178,11 @@ export default async function DashboardPage() {
         <div className="min-w-0">
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <h2 className="font-display text-lg font-semibold text-ink">Jadwal service hari ini</h2>
-              <p className="mt-0.5 text-xs text-muted">Aktivitas teknisi dan kunjungan yang dijadwalkan</p>
+              <h2 className="font-display text-lg font-semibold text-ink">Today's Service Schedule</h2>
+              <p className="mt-0.5 text-xs text-muted">Scheduled technician visits and activities</p>
             </div>
             <Link href="/admin/service/riwayat" className="text-xs font-medium text-primary hover:opacity-70">
-              Lihat semua
+              View All
             </Link>
           </div>
 
@@ -192,7 +192,7 @@ export default async function DashboardPage() {
                 {serviceToday.map((service, index) => (
                   <div key={service.id} className="flex gap-4 px-5 py-4">
                     <div className="flex w-16 shrink-0 flex-col items-center justify-center rounded-md bg-primary-light px-2 py-2 text-center">
-                      <span className="text-xs text-muted">{index === 0 ? 'Next' : 'Jam'}</span>
+                      <span className="text-xs text-muted">{index === 0 ? 'Next' : 'Time'}</span>
                       <span className="mt-0.5 text-sm font-semibold text-primary">{formatTime(service.scheduled_at)}</span>
                     </div>
 
@@ -203,7 +203,7 @@ export default async function DashboardPage() {
                       </div>
                       <div className="mt-2 flex items-start gap-1.5 text-xs text-muted">
                         <MapPin size={14} className="mt-0.5 shrink-0" />
-                        <span className="line-clamp-2">{service.location_address || 'Lokasi belum diisi'}</span>
+                        <span className="line-clamp-2">{service.location_address || 'Location not provided'}</span>
                       </div>
                     </div>
                   </div>
@@ -214,8 +214,8 @@ export default async function DashboardPage() {
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-success/10 text-success">
                   <CheckCircle2 size={22} />
                 </div>
-                <p className="text-sm font-medium text-ink">Tidak ada jadwal service</p>
-                <p className="mt-1 max-w-xs text-xs leading-5 text-muted">Belum ada kunjungan atau service yang dijadwalkan untuk hari ini.</p>
+                <p className="text-sm font-medium text-ink">No service scheduled</p>
+                <p className="mt-1 max-w-xs text-xs leading-5 text-muted">No visits or services scheduled for today.</p>
               </div>
             )}
           </div>

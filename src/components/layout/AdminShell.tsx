@@ -45,21 +45,21 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
           <div className="flex items-center gap-3">
             {notifPermission === 'granted' && (
-              <span title="Notifikasi browser aktif" className="flex h-8 w-8 items-center justify-center rounded-md text-success">
+              <span title="Browser notifications active" className="flex h-8 w-8 items-center justify-center rounded-md text-success">
                 <BellRing size={18} />
               </span>
             )}
             {notifPermission === 'default' && (
               <button
                 onClick={requestPermission}
-                title="Aktifkan notifikasi browser"
+                title="Enable browser notifications"
                 className="flex h-8 w-8 items-center justify-center rounded-md text-muted hover:bg-canvas"
               >
                 <Bell size={18} />
               </button>
             )}
             {notifPermission === 'denied' && (
-              <span title="Notifikasi diblokir — aktifkan lewat pengaturan browser" className="flex h-8 w-8 items-center justify-center rounded-md text-muted">
+              <span title="Notifications blocked — enable via browser settings" className="flex h-8 w-8 items-center justify-center rounded-md text-muted">
                 <BellOff size={18} />
               </span>
             )}
@@ -75,7 +75,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                     onClick={handleLogout}
                     className="block w-full px-3 py-2 text-left text-sm text-danger hover:bg-canvas"
                   >
-                    Keluar
+                    Log Out
                   </button>
                 </div>
               )}

@@ -11,40 +11,40 @@ type Badges = {
 
 function buildGroups(badges: Badges) {
   return [
-    { label: 'Utama', items: [{ label: 'Dashboard', href: '/admin/dashboard', badge: 0 }] },
+    { label: 'Main', items: [{ label: 'Dashboard', href: '/admin/dashboard', badge: 0 }] },
     {
-      label: 'Produk & stok',
+      label: 'Products & Stock',
       items: [
-        { label: 'Produk retail', href: '/admin/produk/retail', badge: 0 },
-        { label: 'Produk equipment', href: '/admin/produk/equipment', badge: 0 },
-        { label: 'Serial number', href: '/admin/serial-number', badge: 0 },
-        { label: 'Stok opname', href: '/admin/stok/opname', badge: 0 },
-        { label: 'Riwayat stok', href: '/admin/stok/movement', badge: 0 },
+        { label: 'Retail Products', href: '/admin/produk/retail', badge: 0 },
+        { label: 'Equipment Products', href: '/admin/produk/equipment', badge: 0 },
+        { label: 'Serial Numbers', href: '/admin/serial-number', badge: 0 },
+        { label: 'Stock Count', href: '/admin/stok/opname', badge: 0 },
+        { label: 'Stock History', href: '/admin/stok/movement', badge: 0 },
       ],
     },
     {
-      label: 'Transaksi',
+      label: 'Transactions',
       items: [
-        { label: 'Order retail', href: '/admin/order/retail', badge: badges.retailPending },
-        { label: 'Order equipment', href: '/admin/order/equipment', badge: badges.equipmentPending },
+        { label: 'Retail Orders', href: '/admin/order/retail', badge: badges.retailPending },
+        { label: 'Equipment Orders', href: '/admin/order/equipment', badge: badges.equipmentPending },
         { label: 'Delivery', href: '/admin/delivery', badge: 0 },
       ],
     },
     {
       label: 'Service',
       items: [
-        { label: 'Booking masuk', href: '/admin/service/booking', badge: badges.serviceRequested },
-        { label: 'Assign teknisi', href: '/admin/service/assign', badge: 0 },
-        { label: 'Riwayat service', href: '/admin/service/riwayat', badge: 0 },
+        { label: 'Incoming Bookings', href: '/admin/service/booking', badge: badges.serviceRequested },
+        { label: 'Assign Technician', href: '/admin/service/assign', badge: 0 },
+        { label: 'Service History', href: '/admin/service/riwayat', badge: 0 },
         { label: 'Warranty', href: '/admin/warranty', badge: 0 },
       ],
     },
-    { label: 'Sales', items: [{ label: 'Buat Order', href: '/admin/sales', badge: 0 }] },
+    { label: 'Sales', items: [{ label: 'Create Order', href: '/admin/sales', badge: 0 }] },
     {
-      label: 'Lainnya',
+      label: 'Other',
       items: [
-        { label: 'Laporan', href: '/admin/laporan', badge: 0 },
-        { label: 'User', href: '/admin/user', badge: 0 },
+        { label: 'Reports', href: '/admin/laporan', badge: 0 },
+        { label: 'Users', href: '/admin/user', badge: 0 },
       ],
     },
   ]
