@@ -6,8 +6,8 @@ import { createUser } from '@/app/admin/user/actions'
 
 type User = { id: string; full_name: string; role: string; phone: string | null }
 
-const roleLabel: Record<string, string> = { admin: 'Admin', staff_gudang: 'Staff Gudang', kurir: 'Kurir', teknisi: 'Teknisi' }
-const roleStyle: Record<string, string> = { admin: 'text-primary', staff_gudang: 'text-ink', kurir: 'text-amber', teknisi: 'text-success' }
+const roleLabel: Record<string, string> = { admin: 'Admin', staff_gudang: 'Staff Gudang', kurir: 'Kurir', teknisi: 'Teknisi', sales: 'Sales', vendor: 'Vendor' }
+const roleStyle: Record<string, string> = { admin: 'text-primary', staff_gudang: 'text-ink', kurir: 'text-amber', teknisi: 'text-success', sales: 'text-primary', vendor: 'text-danger' }
 
 export default function UserTable() {
   const supabase = createClient()
@@ -103,6 +103,8 @@ export default function UserTable() {
                 <option value="staff_gudang">Staff Gudang</option>
                 <option value="kurir">Kurir</option>
                 <option value="teknisi">Teknisi</option>
+                <option value="sales">Sales</option>
+                <option value="vendor">Vendor</option>
                 <option value="admin">Admin</option>
               </select>
             </div>

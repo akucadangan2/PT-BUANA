@@ -53,6 +53,14 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/admin/sales', request.url))
       }
     }
+  
+    if (profile?.role === 'vendor') {
+      const allowed = ['/admin/vendor']
+      const isAllowed = allowed.some((p) => request.nextUrl.pathname.startsWith(p))
+      if (request.nextUrl.pathname.startsWith('/admin') && !isAllowed) {
+        return NextResponse.redirect(new URL('/admin/vendor/products', request.url))
+      }
+    }
   }
 
   return response
