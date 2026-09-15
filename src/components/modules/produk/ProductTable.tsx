@@ -8,7 +8,7 @@ import { formatPrice } from '@/lib/format-price'
 type Product = {
   id: string; sku: string; name: string; description: string | null
   price: number; unit: string; stock_qty: number; low_stock_threshold: number
-  image_url: string | null
+  image_url: string | null; subcategory: string | null
 }
 
 export default function ProductTable({ category }: { category: 'retail' | 'equipment' }) {
@@ -22,7 +22,7 @@ export default function ProductTable({ category }: { category: 'retail' | 'equip
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<Product | null>(null)
-  const [form, setForm] = useState({ sku: '', name: '', description: '', price: 0, unit: 'pcs', stock_qty: 0, low_stock_threshold: 5, image_url: '', floor_price: '' })
+  const [form, setForm] = useState({ sku: '', name: '', description: '', price: 0, unit: 'pcs', stock_qty: 0, low_stock_threshold: 5, image_url: '', floor_price: '', subcategory: '' })
 
   async function load() {
     setLoading(true)
@@ -48,7 +48,7 @@ export default function ProductTable({ category }: { category: 'retail' | 'equip
 
   function openAdd() {
     setEditing(null)
-    setForm({ sku: '', name: '', description: '', price: 0, unit: 'pcs', stock_qty: 0, low_stock_threshold: 5, image_url: '', floor_price: '' })
+    setForm({ sku: '', name: '', description: '', price: 0, unit: 'pcs', stock_qty: 0, low_stock_threshold: 5, image_url: '', floor_price: '', subcategory: '' })
     setShowForm(true)
   }
 
@@ -58,13 +58,14 @@ export default function ProductTable({ category }: { category: 'retail' | 'equip
       sku: p.sku, name: p.name, description: p.description ?? '', price: p.price, unit: p.unit,
       stock_qty: p.stock_qty, low_stock_threshold: p.low_stock_threshold, image_url: p.image_url ?? '',
       floor_price: floorPrices[p.id] !== undefined ? String(floorPrices[p.id]) : '',
+      subcategory: p.subcategory ?? '',
     })
     setShowForm(true)
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const { floor_price, ...productForm } = form
+    const { floor_price: floorPriceValue, ...productForm } = form
     let productId = editing?.id
 
     if (editing) {
@@ -74,8 +75,8 @@ export default function ProductTable({ category }: { category: 'retail' | 'equip
       productId = data?.id
     }
 
-    if (productId && floor_price.trim() !== '') {
-      await supabase.from('product_floor_prices').upsert({ product_id: productId, floor_price: Number(floor_price) }, { onConflict: 'product_id' })
+    if (productId && floorPriceValue.trim() !== '') {
+      await supabase.from('product_floor_prices').upsert({ product_id: productId, floor_price: Number(floorPriceValue) }, { onConflict: 'product_id' })
     }
 
     setShowForm(false)
@@ -116,6 +117,7 @@ export default function ProductTable({ category }: { category: 'retail' | 'equip
                   <th className="px-4 py-3 font-normal"></th>
                   <th className="px-4 py-3 font-normal">SKU</th>
                   <th className="px-4 py-3 font-normal">Nama</th>
+                  <th className="px-4 py-3 font-normal">Kategori</th>
                   <th className="px-4 py-3 font-normal">Harga</th>
                   <th className="px-4 py-3 font-normal">Floor Price</th>
                   <th className="px-4 py-3 font-normal">{category === 'retail' ? 'Stok' : 'Unit'}</th>
@@ -134,6 +136,7 @@ export default function ProductTable({ category }: { category: 'retail' | 'equip
                     </td>
                     <td className="px-4 py-3 text-muted">{p.sku}</td>
                     <td className="px-4 py-3 text-ink">{p.name}</td>
+                    <td className="px-4 py-3 text-muted">{p.subcategory ?? '-'}</td>
                     <td className="px-4 py-3 text-ink">{formatPrice(p.price)}</td>
                     <td className="px-4 py-3 text-amber">{floorPrices[p.id] !== undefined ? formatPrice(floorPrices[p.id]) : '-'}</td>
                     <td className="px-4 py-3">
@@ -150,7 +153,7 @@ export default function ProductTable({ category }: { category: 'retail' | 'equip
                   </tr>
                 ))}
                 {products.length === 0 && (
-                  <tr><td colSpan={7} className="px-4 py-6 text-center text-muted">Gak ada produk yang cocok</td></tr>
+                  <tr><td colSpan={8} className="px-4 py-6 text-center text-muted">Gak ada produk yang cocok</td></tr>
                 )}
               </tbody>
             </table>
@@ -171,6 +174,9 @@ export default function ProductTable({ category }: { category: 'retail' | 'equip
               <input type="number" placeholder="Floor price (harga terendah buat sales, opsional)" value={form.floor_price} onChange={(e) => setForm({ ...form, floor_price: e.target.value })} className="w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-primary" />
               {category === 'retail' && (
                 <input type="number" placeholder="Stok" value={form.stock_qty} onChange={(e) => setForm({ ...form, stock_qty: Number(e.target.value) })} className="w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-primary" />
+              )}
+              {category === 'retail' && (
+                <input placeholder="Kategori (misal: Minuman, Snack, Bumbu)" value={form.subcategory} onChange={(e) => setForm({ ...form, subcategory: e.target.value })} className="w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-primary" />
               )}
               <input type="url" placeholder="URL Gambar (opsional)" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} className="w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-primary" />
               <input type="number" placeholder="Ambang stok menipis" value={form.low_stock_threshold} onChange={(e) => setForm({ ...form, low_stock_threshold: Number(e.target.value) })} className="w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-primary" />
