@@ -31,7 +31,7 @@ export default function OrderTable({ category }: { category: 'retail' | 'equipme
     const to = from + pageSize - 1
     let query = supabase
       .from('orders')
-      .select('id, status, total, created_at, users(full_name), order_items(id, product_id, serial_number_id, qty, price, products(name))', { count: 'exact' })
+      .select('id, status, total, created_at, users!customer_id(full_name), order_items(id, product_id, serial_number_id, qty, price, products(name))', { count: 'exact' })
       .eq('category', category)
       .order('created_at', { ascending: false })
       .range(from, to)
