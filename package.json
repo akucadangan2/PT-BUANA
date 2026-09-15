@@ -20,6 +20,7 @@
     "react-dom": "^19.0.0",
     "react-map-gl": "^7.1.7",
     "recharts": "^2.15.4",
+    "stripe": "^22.6.2",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
