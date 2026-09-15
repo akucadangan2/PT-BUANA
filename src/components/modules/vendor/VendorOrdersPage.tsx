@@ -22,7 +22,7 @@ export default function VendorOrdersPage() {
     const { data: { user } } = await supabase.auth.getUser()
     const { data } = await supabase
       .from('order_items')
-      .select('id, qty, price, products!inner(name, vendor_id), orders(id, status, delivery_address, created_at, users(full_name, phone))')
+      .select('id, qty, price, products!inner(name, vendor_id), orders(id, status, delivery_address, created_at, users!customer_id(full_name, phone))')
       .eq('products.vendor_id', user?.id)
       .order('id', { ascending: false })
     setItems((data as any) ?? [])
