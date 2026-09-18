@@ -14,9 +14,9 @@ type Delivery = {
 }
 type Courier = { id: string; full_name: string }
 
-const statusOptions = ['assigned', 'picked_up', 'on_the_way', 'delivered', 'failed']
+const statusOptions = ['pending', 'assigned', 'picked_up', 'on_the_way', 'delivered', 'failed']
 const statusStyle: Record<string, string> = {
-  assigned: 'text-muted', picked_up: 'text-primary', on_the_way: 'text-amber', delivered: 'text-success', failed: 'text-danger',
+  pending: 'text-amber', assigned: 'text-muted', picked_up: 'text-primary', on_the_way: 'text-amber', delivered: 'text-success', failed: 'text-danger',
 }
 
 export default function DeliveryPanel() {
