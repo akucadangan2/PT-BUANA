@@ -20,6 +20,7 @@ function buildGroups(badges: Badges) {
         { label: 'Serial Numbers', href: '/admin/serial-number', badge: 0 },
         { label: 'Stock Count', href: '/admin/stok/opname', badge: 0 },
         { label: 'Stock History', href: '/admin/stok/movement', badge: 0 },
+        { label: 'Import Products', href: '/admin/produk/import', badge: 0 },
       ],
     },
     {
@@ -41,10 +42,18 @@ function buildGroups(badges: Badges) {
     },
     { label: 'Sales', items: [{ label: 'Create Order', href: '/admin/sales', badge: 0 }] },
     {
+      label: 'Vendor',
+      items: [
+        { label: 'Listing Saya', href: '/admin/vendor/products', badge: 0 },
+        { label: 'PO Masuk', href: '/admin/vendor/orders', badge: 0 },
+      ],
+    },
+    {
       label: 'Other',
       items: [
         { label: 'Reports', href: '/admin/laporan', badge: 0 },
         { label: 'Users', href: '/admin/user', badge: 0 },
+        { label: 'Vendor Payout', href: '/admin/vendor-payouts', badge: 0 },
       ],
     },
   ]
