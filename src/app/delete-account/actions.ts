@@ -21,7 +21,7 @@ export async function requestAccountDeletion(email: string, password: string) {
   const anon = anonClient()
   const { data, error } = await anon.auth.signInWithPassword({ email, password })
   if (error || !data.user) {
-    throw new Error('Email atau password salah')
+    throw new Error('Incorrect email or password')
   }
 
   const userId = data.user.id
