@@ -14,7 +14,7 @@ export default function DeleteAccountPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!confirmed) {
-      setError('Centang konfirmasi dulu sebelum melanjutkan')
+      setError('Please confirm the checkbox before continuing')
       return
     }
     setError('')
@@ -23,7 +23,7 @@ export default function DeleteAccountPage() {
       await requestAccountDeletion(email, password)
       setDone(true)
     } catch (err: any) {
-      setError(err.message ?? 'Gagal memproses permintaan')
+      setError(err.message ?? 'Failed to process your request')
     } finally {
       setLoading(false)
     }
@@ -32,11 +32,11 @@ export default function DeleteAccountPage() {
   if (done) {
     return (
       <div className="mx-auto max-w-2xl px-6 py-16 text-sm text-ink">
-        <h1 className="mb-2 font-display text-2xl font-semibold">Akun Berhasil Dihapus</h1>
+        <h1 className="mb-2 font-display text-2xl font-semibold">Account Deleted</h1>
         <p className="text-muted">
-          Data pribadi Anda (nama, telepon, alamat, favorit) sudah dihapus dan akses login ke akun ini
-          sudah dinonaktifkan permanen. Riwayat transaksi tetap disimpan dalam bentuk anonim untuk
-          keperluan pencatatan sesuai kewajiban hukum yang berlaku.
+          Your personal data (name, phone number, addresses, favourites) has been deleted and login
+          access to this account has been permanently disabled. Transaction history remains stored in
+          anonymised form for record-keeping purposes as required by law.
         </p>
       </div>
     )
@@ -44,32 +44,32 @@ export default function DeleteAccountPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-16 text-sm leading-relaxed text-ink">
-      <h1 className="mb-2 font-display text-2xl font-semibold">Penghapusan Akun</h1>
+      <h1 className="mb-2 font-display text-2xl font-semibold">Account Deletion</h1>
       <p className="mb-8 text-muted">
-        Terakhir diperbarui: {new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}
+        Last updated: {new Date().toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' })}
       </p>
 
-      <h2 className="mb-2 mt-6 font-display text-lg font-semibold">Data yang Akan Dihapus</h2>
+      <h2 className="mb-2 mt-6 font-display text-lg font-semibold">Data That Will Be Deleted</h2>
       <p className="mb-4">
-        Nama, nomor telepon, alamat tersimpan, produk favorit, dan token notifikasi akan dihapus dari
-        sistem kami. Akses login ke akun ini akan dinonaktifkan secara permanen.
+        Your name, phone number, saved addresses, favourite products, and notification token will be
+        deleted from our system. Login access to this account will be permanently disabled.
       </p>
 
-      <h2 className="mb-2 mt-6 font-display text-lg font-semibold">Data yang Dapat Dipertahankan</h2>
+      <h2 className="mb-2 mt-6 font-display text-lg font-semibold">Data That May Be Retained</h2>
       <p className="mb-6">
-        Riwayat transaksi (order, service) tetap disimpan dalam bentuk anonim untuk memenuhi kewajiban
-        hukum, perpajakan, dan pencatatan transaksi, sesuai jangka waktu yang berlaku.
+        Transaction history (orders, service) remains stored in anonymised form to meet legal, tax, and
+        record-keeping obligations, for the period required by applicable law.
       </p>
 
       <div className="rounded-lg border border-line bg-surface p-6">
-        <h2 className="mb-4 font-display text-lg font-semibold">Ajukan Penghapusan Akun</h2>
+        <h2 className="mb-4 font-display text-lg font-semibold">Request Account Deletion</h2>
 
         {error && <p className="mb-4 text-sm text-danger">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
             type="email"
-            placeholder="Email akun Anda"
+            placeholder="Your account email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-primary"
@@ -85,14 +85,14 @@ export default function DeleteAccountPage() {
           />
           <label className="flex items-start gap-2 text-xs text-muted">
             <input type="checkbox" checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)} className="mt-0.5" />
-            Saya mengerti tindakan ini permanen dan tidak dapat dibatalkan.
+            I understand this action is permanent and cannot be undone.
           </label>
           <button
             type="submit"
             disabled={loading}
             className="w-full rounded-md bg-danger py-2.5 text-sm font-medium text-white disabled:opacity-50"
           >
-            {loading ? 'Memproses...' : 'Hapus Akun Saya'}
+            {loading ? 'Processing...' : 'Delete My Account'}
           </button>
         </form>
       </div>
