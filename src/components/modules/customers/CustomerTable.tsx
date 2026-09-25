@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import Pagination from '@/components/ui/Pagination'
 
 type Customer = {
-  id: string; full_name: string; phone: string | null; email: string | null
+  id: string; full_name: string; phone: string | null
   abn: string | null; delivery_note: string | null; billing_address: string | null
   access_suspended: boolean; created_at: string
 }
@@ -29,7 +29,7 @@ export default function CustomerTable() {
     const to = from + pageSize - 1
     let query = supabase
       .from('users')
-      .select('id, full_name, phone, email, abn, delivery_note, billing_address, access_suspended, created_at', { count: 'exact' })
+      .select('id, full_name, phone, abn, delivery_note, billing_address, access_suspended, created_at', { count: 'exact' })
       .eq('role', 'customer')
       .order('full_name')
       .range(from, to)
