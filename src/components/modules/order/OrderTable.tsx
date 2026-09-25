@@ -4,12 +4,14 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Pagination from '@/components/ui/Pagination'
 import { formatPrice } from '@/lib/format-price'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 type OrderItem = { id: string; product_id: string; serial_number_id: string | null; qty: number; price: number; products: { name: string } | null }
 type Order = {
   id: string; status: string; total: number; created_at: string; updated_at: string | null
   delivery_address: string | null
-  users: { full_name: string; phone: string | null } | null
+  users: { full_name: string; phone: string | null; abn: string | null; billing_address: string | null } | null
   order_items: OrderItem[]
 }
 type SerialOption = { id: string; serial_number: string }
@@ -34,6 +36,7 @@ export default function OrderTable({ category }: { category: 'retail' | 'equipme
   const [loading, setLoading] = useState(true)
   const [detailOrder, setDetailOrder] = useState<Order | null>(null)
   const [availableSerials, setAvailableSerials] = useState<Record<string, SerialOption[]>>({})
+  const [generatingPdf, setGeneratingPdf] = useState(false)
 
   async function load() {
     setLoading(true)
@@ -41,7 +44,7 @@ export default function OrderTable({ category }: { category: 'retail' | 'equipme
     const to = from + pageSize - 1
     let query = supabase
       .from('orders')
-      .select('id, status, total, created_at, updated_at, delivery_address, users!customer_id(full_name, phone), order_items(id, product_id, serial_number_id, qty, price, products(name))', { count: 'exact' })
+      .select('id, status, total, created_at, updated_at, delivery_address, users!customer_id(full_name, phone, abn, billing_address), order_items(id, product_id, serial_number_id, qty, price, products(name))', { count: 'exact' })
       .eq('category', category)
       .order('created_at', { ascending: false })
       .range(from, to)
@@ -91,6 +94,102 @@ export default function OrderTable({ category }: { category: 'retail' | 'equipme
     if (detailOrder) {
       const updatedItems = detailOrder.order_items.map((it) => (it.id === itemId ? { ...it, serial_number_id: serialNumberId } : it))
       setDetailOrder({ ...detailOrder, order_items: updatedItems })
+    }
+  }
+
+  async function generateInvoicePdf(order: Order) {
+    setGeneratingPdf(true)
+    try {
+      const { data: configRows } = await supabase.from('app_config').select('key, value').in('key', ['company_name', 'company_address', 'company_abn', 'company_email'])
+      const config: Record<string, string> = {}
+      configRows?.forEach((r: any) => { config[r.key] = r.value })
+
+      const doc = new jsPDF()
+      const pageWidth = doc.internal.pageSize.getWidth()
+      let y = 20
+
+      doc.setFontSize(16)
+      doc.setFont('helvetica', 'bold')
+      doc.text(config.company_name ?? 'BUANA', 14, y)
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'normal')
+      y += 6
+      doc.text(config.company_address ?? '', 14, y)
+      y += 5
+      doc.text(`ABN: ${config.company_abn ?? '-'}`, 14, y)
+      y += 5
+      doc.text(config.company_email ?? '', 14, y)
+
+      doc.setFontSize(18)
+      doc.setFont('helvetica', 'bold')
+      doc.text('TAX INVOICE', pageWidth - 14, 20, { align: 'right' })
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'normal')
+      doc.text(`Invoice #: ${order.id.slice(0, 8).toUpperCase()}`, pageWidth - 14, 28, { align: 'right' })
+      doc.text(`Date: ${new Date(order.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}`, pageWidth - 14, 33, { align: 'right' })
+
+      y = 50
+      doc.setDrawColor(220, 220, 220)
+      doc.line(14, y, pageWidth - 14, y)
+      y += 10
+
+      doc.setFont('helvetica', 'bold')
+      doc.text('Bill To', 14, y)
+      y += 6
+      doc.setFont('helvetica', 'normal')
+      doc.text(order.users?.full_name ?? '-', 14, y)
+      y += 5
+      if (order.users?.billing_address) {
+        const lines = doc.splitTextToSize(order.users.billing_address, 90)
+        doc.text(lines, 14, y)
+        y += lines.length * 5
+      }
+      if (order.users?.abn) {
+        doc.text(`ABN: ${order.users.abn}`, 14, y)
+        y += 5
+      }
+
+      const tableY = Math.max(y + 8, 85)
+      autoTable(doc, {
+        startY: tableY,
+        head: [['Item', 'Qty', 'Unit Price', 'Subtotal']],
+        body: order.order_items.map((item) => [
+          item.products?.name ?? '-',
+          String(item.qty),
+          formatPrice(item.price),
+          formatPrice(item.price * item.qty),
+        ]),
+        foot: [['', '', 'Total', formatPrice(order.total)]],
+        theme: 'grid',
+        headStyles: { fillColor: [15, 110, 110] },
+        footStyles: { fillColor: [247, 248, 250], textColor: [16, 24, 40], fontStyle: 'bold' },
+        styles: { fontSize: 9 },
+      })
+
+      let finalY = (doc as any).lastAutoTable.finalY + 15
+      if (finalY > 250) { doc.addPage(); finalY = 20 }
+
+      doc.setFontSize(13)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Surat Jalan / Delivery Note', 14, finalY)
+      finalY += 8
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'normal')
+      doc.text('Deliver to:', 14, finalY)
+      finalY += 5
+      const addrLines = doc.splitTextToSize(order.delivery_address ?? '-', pageWidth - 28)
+      doc.text(addrLines, 14, finalY)
+      finalY += addrLines.length * 5 + 10
+
+      doc.text('Received by (Name & Signature):', 14, finalY)
+      finalY += 20
+      doc.line(14, finalY, 90, finalY)
+      doc.text('Date:', 110, finalY - 1)
+      doc.line(125, finalY, 180, finalY)
+
+      doc.save(`invoice-${order.id.slice(0, 8)}.pdf`)
+    } finally {
+      setGeneratingPdf(false)
     }
   }
 
@@ -243,6 +342,14 @@ export default function OrderTable({ category }: { category: 'retail' | 'equipme
                 <p className="text-sm font-medium text-ink">Total</p>
                 <p className="font-display text-lg font-semibold text-ink">{formatPrice(detailOrder.total)}</p>
               </div>
+
+              <button
+                onClick={() => generateInvoicePdf(detailOrder)}
+                disabled={generatingPdf}
+                className="w-full rounded-md border border-primary px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary-light disabled:opacity-50"
+              >
+                {generatingPdf ? 'Membuat PDF...' : '📄 Download Invoice / Surat Jalan (PDF)'}
+              </button>
             </div>
           </div>
         </div>
