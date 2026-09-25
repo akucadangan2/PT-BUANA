@@ -124,3 +124,4 @@ create table stock_movements (
   created_by uuid references users(id),
   created_at timestamptz default now()
 );
+ 
