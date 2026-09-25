@@ -55,6 +55,7 @@ function buildGroups(badges: Badges) {
         { label: 'Reports', href: '/admin/laporan', badge: 0 },
         { label: 'Users', href: '/admin/user', badge: 0 },
         { label: 'Customers', href: '/admin/customers', badge: 0 },
+        { label: 'Customer Groups', href: '/admin/customer-groups', badge: 0 },
         { label: 'Vendor Payout', href: '/admin/vendor-payouts', badge: 0 },
       ],
     },

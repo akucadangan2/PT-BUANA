@@ -7,8 +7,9 @@ import Pagination from '@/components/ui/Pagination'
 type Customer = {
   id: string; full_name: string; phone: string | null
   abn: string | null; delivery_note: string | null; billing_address: string | null
-  access_suspended: boolean; created_at: string
+  access_suspended: boolean; created_at: string; customer_group_id: string | null
 }
+type Group = { id: string; name: string; discount_percent: number }
 
 export default function CustomerTable() {
   const supabase = createClient()
@@ -21,7 +22,8 @@ export default function CustomerTable() {
   const [detail, setDetail] = useState<Customer | null>(null)
   const [saving, setSaving] = useState(false)
   const [orderCount, setOrderCount] = useState<number | null>(null)
-  const [form, setForm] = useState({ full_name: '', phone: '', abn: '', delivery_note: '', billing_address: '' })
+  const [groups, setGroups] = useState<Group[]>([])
+  const [form, setForm] = useState({ full_name: '', phone: '', abn: '', delivery_note: '', billing_address: '', customer_group_id: '' })
 
   async function load() {
     setLoading(true)
@@ -29,7 +31,7 @@ export default function CustomerTable() {
     const to = from + pageSize - 1
     let query = supabase
       .from('users')
-      .select('id, full_name, phone, abn, delivery_note, billing_address, access_suspended, created_at', { count: 'exact' })
+      .select('id, full_name, phone, abn, delivery_note, billing_address, access_suspended, created_at, customer_group_id', { count: 'exact' })
       .eq('role', 'customer')
       .order('full_name')
       .range(from, to)
@@ -40,14 +42,21 @@ export default function CustomerTable() {
     setLoading(false)
   }
 
+  async function loadGroups() {
+    const { data } = await supabase.from('customer_groups').select('*').order('name')
+    setGroups(data ?? [])
+  }
+
   useEffect(() => { load() }, [page, pageSize, search])
   useEffect(() => { setPage(1) }, [search])
+  useEffect(() => { loadGroups() }, [])
 
   async function openDetail(c: Customer) {
     setDetail(c)
     setForm({
       full_name: c.full_name, phone: c.phone ?? '', abn: c.abn ?? '',
       delivery_note: c.delivery_note ?? '', billing_address: c.billing_address ?? '',
+      customer_group_id: c.customer_group_id ?? '',
     })
     const { count } = await supabase.from('orders').select('id', { count: 'exact', head: true }).eq('customer_id', c.id)
     setOrderCount(count ?? 0)
@@ -56,7 +65,7 @@ export default function CustomerTable() {
   async function handleSave() {
     if (!detail) return
     setSaving(true)
-    await supabase.from('users').update(form).eq('id', detail.id)
+    await supabase.from('users').update({ ...form, customer_group_id: form.customer_group_id || null }).eq('id', detail.id)
     setSaving(false)
     setDetail(null)
     load()
@@ -164,6 +173,14 @@ export default function CustomerTable() {
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted">Phone Number</label>
                 <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-primary" />
+              </div>
+                
+                <div>
+                <label className="mb-1 block text-xs font-medium text-muted">Customer Group</label>
+                <select value={form.customer_group_id} onChange={(e) => setForm({ ...form, customer_group_id: e.target.value })} className="w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-primary">
+                  <option value="">Tanpa grup (harga normal)</option>
+                  {groups.map((g) => <option key={g.id} value={g.id}>{g.name} ({g.discount_percent}% off)</option>)}
+                </select>
               </div>
 
               {orderCount !== null && (
