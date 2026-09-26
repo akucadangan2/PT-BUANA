@@ -15,6 +15,7 @@ type Order = {
   order_items: OrderItem[]
 }
 type SerialOption = { id: string; serial_number: string }
+type CreditNote = { id: string; amount: number; reason: string | null; status: string; created_at: string }
 
 const statusOptions = ['pending', 'confirmed', 'processing', 'delivered', 'cancelled']
 const statusLabel: Record<string, string> = {
@@ -37,6 +38,11 @@ export default function OrderTable({ category }: { category: 'retail' | 'equipme
   const [detailOrder, setDetailOrder] = useState<Order | null>(null)
   const [availableSerials, setAvailableSerials] = useState<Record<string, SerialOption[]>>({})
   const [generatingPdf, setGeneratingPdf] = useState(false)
+  const [creditNotes, setCreditNotes] = useState<CreditNote[]>([])
+  const [showReturnForm, setShowReturnForm] = useState(false)
+  const [returnQtys, setReturnQtys] = useState<Record<string, number>>({})
+  const [returnReason, setReturnReason] = useState('')
+  const [savingReturn, setSavingReturn] = useState(false)
 
   async function load() {
     setLoading(true)
@@ -68,8 +74,17 @@ export default function OrderTable({ category }: { category: 'retail' | 'equipme
   useEffect(() => { setPage(1) }, [category, statusFilter])
   useEffect(() => { loadCounts() }, [category])
 
+  async function loadCreditNotes(orderId: string) {
+    const { data } = await supabase.from('credit_notes').select('id, amount, reason, status, created_at').eq('order_id', orderId).order('created_at', { ascending: false })
+    setCreditNotes(data ?? [])
+  }
+
   async function openDetail(order: Order) {
     setDetailOrder(order)
+    setShowReturnForm(false)
+    setReturnQtys({})
+    setReturnReason('')
+    await loadCreditNotes(order.id)
     if (category === 'equipment') {
       for (const item of order.order_items) {
         if (!availableSerials[item.product_id]) {
@@ -95,6 +110,120 @@ export default function OrderTable({ category }: { category: 'retail' | 'equipme
       const updatedItems = detailOrder.order_items.map((it) => (it.id === itemId ? { ...it, serial_number_id: serialNumberId } : it))
       setDetailOrder({ ...detailOrder, order_items: updatedItems })
     }
+  }
+
+  function openReturnForm() {
+    if (!detailOrder) return
+    const initial: Record<string, number> = {}
+    detailOrder.order_items.forEach((item) => { initial[item.id] = 0 })
+    setReturnQtys(initial)
+    setReturnReason('')
+    setShowReturnForm(true)
+  }
+
+  const returnTotal = detailOrder
+    ? detailOrder.order_items.reduce((sum, item) => sum + (returnQtys[item.id] ?? 0) * item.price, 0)
+    : 0
+
+  async function submitReturn() {
+    if (!detailOrder) return
+    const itemsToReturn = detailOrder.order_items.filter((item) => (returnQtys[item.id] ?? 0) > 0)
+    if (itemsToReturn.length === 0) {
+      alert('Pilih minimal 1 item dengan qty retur lebih dari 0')
+      return
+    }
+    setSavingReturn(true)
+    try {
+      const { data: creditNote, error } = await supabase
+        .from('credit_notes')
+        .insert({
+          order_id: detailOrder.id,
+          customer_id: (detailOrder as any).customer_id ?? null,
+          amount: returnTotal,
+          reason: returnReason || null,
+        })
+        .select()
+        .single()
+
+      if (error || !creditNote) throw error
+
+      const rows = itemsToReturn.map((item) => ({
+        credit_note_id: creditNote.id,
+        order_item_id: item.id,
+        product_name: item.products?.name ?? '-',
+        qty_returned: returnQtys[item.id],
+        amount: returnQtys[item.id] * item.price,
+      }))
+      await supabase.from('credit_note_items').insert(rows)
+
+      setShowReturnForm(false)
+      await loadCreditNotes(detailOrder.id)
+    } catch (err: any) {
+      alert('Gagal memproses retur: ' + (err.message ?? 'Terjadi kesalahan'))
+    } finally {
+      setSavingReturn(false)
+    }
+  }
+
+  async function generateCreditNotePdf(cn: CreditNote) {
+    if (!detailOrder) return
+    const { data: items } = await supabase.from('credit_note_items').select('product_name, qty_returned, amount').eq('credit_note_id', cn.id)
+    const { data: configRows } = await supabase.from('app_config').select('key, value').in('key', ['company_name', 'company_address', 'company_abn'])
+    const config: Record<string, string> = {}
+    configRows?.forEach((r: any) => { config[r.key] = r.value })
+
+    const doc = new jsPDF()
+    const pageWidth = doc.internal.pageSize.getWidth()
+    let y = 20
+
+    doc.setFontSize(16)
+    doc.setFont('helvetica', 'bold')
+    doc.text(config.company_name ?? 'BUANA', 14, y)
+    doc.setFontSize(9)
+    doc.setFont('helvetica', 'normal')
+    y += 6
+    doc.text(config.company_address ?? '', 14, y)
+    y += 5
+    doc.text(`ABN: ${config.company_abn ?? '-'}`, 14, y)
+
+    doc.setFontSize(18)
+    doc.setFont('helvetica', 'bold')
+    doc.text('CREDIT NOTE', pageWidth - 14, 20, { align: 'right' })
+    doc.setFontSize(9)
+    doc.setFont('helvetica', 'normal')
+    doc.text(`Credit Note #: ${cn.id.slice(0, 8).toUpperCase()}`, pageWidth - 14, 28, { align: 'right' })
+    doc.text(`Ref Invoice #: ${detailOrder.id.slice(0, 8).toUpperCase()}`, pageWidth - 14, 33, { align: 'right' })
+    doc.text(`Date: ${new Date(cn.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}`, pageWidth - 14, 38, { align: 'right' })
+
+    y = 50
+    doc.setDrawColor(220, 220, 220)
+    doc.line(14, y, pageWidth - 14, y)
+    y += 10
+
+    doc.setFont('helvetica', 'bold')
+    doc.text('Issued To', 14, y)
+    y += 6
+    doc.setFont('helvetica', 'normal')
+    doc.text(detailOrder.users?.full_name ?? '-', 14, y)
+
+    autoTable(doc, {
+      startY: y + 10,
+      head: [['Item', 'Qty Returned', 'Amount']],
+      body: (items ?? []).map((it: any) => [it.product_name, String(it.qty_returned), formatPrice(it.amount)]),
+      foot: [['', 'Total Credit', formatPrice(cn.amount)]],
+      theme: 'grid',
+      headStyles: { fillColor: [192, 68, 46] },
+      footStyles: { fillColor: [247, 248, 250], textColor: [16, 24, 40], fontStyle: 'bold' },
+      styles: { fontSize: 9 },
+    })
+
+    let finalY = (doc as any).lastAutoTable.finalY + 10
+    if (cn.reason) {
+      doc.setFontSize(9)
+      doc.text(`Reason: ${cn.reason}`, 14, finalY)
+    }
+
+    doc.save(`credit-note-${cn.id.slice(0, 8)}.pdf`)
   }
 
   async function generateInvoicePdf(order: Order) {
@@ -194,6 +323,7 @@ export default function OrderTable({ category }: { category: 'retail' | 'equipme
   }
 
   const totalAllCount = Object.values(counts).reduce((a, b) => a + b, 0)
+  const totalCredited = creditNotes.reduce((sum, cn) => sum + cn.amount, 0)
 
   return (
     <div className="space-y-6">
@@ -343,6 +473,13 @@ export default function OrderTable({ category }: { category: 'retail' | 'equipme
                 <p className="font-display text-lg font-semibold text-ink">{formatPrice(detailOrder.total)}</p>
               </div>
 
+              {totalCredited > 0 && (
+                <div className="flex items-center justify-between rounded-md bg-danger/5 px-3 py-2">
+                  <p className="text-sm text-danger">Total Credit Diterbitkan</p>
+                  <p className="text-sm font-semibold text-danger">-{formatPrice(totalCredited)}</p>
+                </div>
+              )}
+
               <button
                 onClick={() => generateInvoicePdf(detailOrder)}
                 disabled={generatingPdf}
@@ -350,6 +487,79 @@ export default function OrderTable({ category }: { category: 'retail' | 'equipme
               >
                 {generatingPdf ? 'Membuat PDF...' : '📄 Download Invoice / Surat Jalan (PDF)'}
               </button>
+
+              <div className="border-t border-line pt-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted">Retur & Credit Note</p>
+                  {!showReturnForm && (
+                    <button onClick={openReturnForm} className="text-xs font-medium text-danger hover:underline">
+                      + Proses Retur
+                    </button>
+                  )}
+                </div>
+
+                {showReturnForm && (
+                  <div className="mb-3 space-y-3 rounded-md border border-line bg-canvas p-3">
+                    {detailOrder.order_items.map((item) => (
+                      <div key={item.id} className="flex items-center justify-between gap-3">
+                        <div className="flex-1">
+                          <p className="text-sm text-ink">{item.products?.name}</p>
+                          <p className="text-xs text-muted">Dipesan: {item.qty} × {formatPrice(item.price)}</p>
+                        </div>
+                        <input
+                          type="number"
+                          min={0}
+                          max={item.qty}
+                          value={returnQtys[item.id] ?? 0}
+                          onChange={(e) => {
+                            const val = Math.min(item.qty, Math.max(0, Number(e.target.value)))
+                            setReturnQtys((prev) => ({ ...prev, [item.id]: val }))
+                          }}
+                          className="w-16 rounded-md border border-line px-2 py-1 text-sm text-center outline-none focus:border-primary"
+                        />
+                      </div>
+                    ))}
+                    <textarea
+                      placeholder="Alasan retur (opsional)"
+                      value={returnReason}
+                      onChange={(e) => setReturnReason(e.target.value)}
+                      className="w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-primary"
+                      rows={2}
+                    />
+                    <div className="flex items-center justify-between border-t border-line pt-2">
+                      <p className="text-sm font-medium text-ink">Total Credit</p>
+                      <p className="text-sm font-semibold text-danger">{formatPrice(returnTotal)}</p>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <button onClick={() => setShowReturnForm(false)} className="rounded-md px-3 py-1.5 text-xs text-muted">Batal</button>
+                      <button
+                        onClick={submitReturn}
+                        disabled={savingReturn || returnTotal <= 0}
+                        className="rounded-md bg-danger px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
+                      >
+                        {savingReturn ? 'Memproses...' : 'Terbitkan Credit Note'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {creditNotes.length > 0 && (
+                  <div className="space-y-2">
+                    {creditNotes.map((cn) => (
+                      <div key={cn.id} className="flex items-center justify-between rounded-md border border-line bg-surface p-3 text-sm">
+                        <div>
+                          <p className="text-ink">Credit Note #{cn.id.slice(0, 8).toUpperCase()}</p>
+                          <p className="text-xs text-muted">{new Date(cn.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}{cn.reason ? ` — ${cn.reason}` : ''}</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <p className="font-medium text-danger">-{formatPrice(cn.amount)}</p>
+                          <button onClick={() => generateCreditNotePdf(cn)} className="text-xs text-primary hover:underline">PDF</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
