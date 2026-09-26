@@ -32,13 +32,30 @@ export default function CustomerTable() {
     const to = from + pageSize - 1
     let query = supabase
       .from('users')
-      .select('id, full_name, phone, email, abn, delivery_note, billing_address, access_suspended, created_at, customer_group_id, credit_term_days', { count: 'exact' })
+      .select('id, full_name, phone, abn, delivery_note, billing_address, access_suspended, created_at, customer_group_id, credit_term_days', { count: 'exact' })
       .eq('role', 'customer')
       .order('full_name')
       .range(from, to)
     if (search.trim()) query = query.ilike('full_name', `%${search.trim()}%`)
     const { data, count } = await query
-    setCustomers((data as any) ?? [])
+
+    let customersData = (data as any) ?? []
+    const session = (await supabase.auth.getSession()).data.session
+    if (session && customersData.length > 0) {
+      try {
+        const res = await fetch('/api/admin/customers/emails', {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        })
+        if (res.ok) {
+          const { emails } = await res.json()
+          customersData = customersData.map((c: Customer) => ({ ...c, email: emails[c.id] ?? null }))
+        }
+      } catch {
+        // Gagal ambil email, biarin kosong, gak block tampilan tabel
+      }
+    }
+
+    setCustomers(customersData)
     setTotal(count ?? 0)
     setLoading(false)
   }
