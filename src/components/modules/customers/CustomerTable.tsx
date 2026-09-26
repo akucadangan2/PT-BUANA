@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import Pagination from '@/components/ui/Pagination'
 
 type Customer = {
-  id: string; full_name: string; phone: string | null
+  id: string; full_name: string; phone: string | null; email: string | null
   abn: string | null; delivery_note: string | null; billing_address: string | null
   access_suspended: boolean; created_at: string; customer_group_id: string | null
   credit_term_days: number | null
@@ -32,7 +32,7 @@ export default function CustomerTable() {
     const to = from + pageSize - 1
     let query = supabase
       .from('users')
-      .select('id, full_name, phone, abn, delivery_note, billing_address, access_suspended, created_at, customer_group_id, credit_term_days', { count: 'exact' })
+      .select('id, full_name, phone, email, abn, delivery_note, billing_address, access_suspended, created_at, customer_group_id, credit_term_days', { count: 'exact' })
       .eq('role', 'customer')
       .order('full_name')
       .range(from, to)
@@ -118,8 +118,8 @@ export default function CustomerTable() {
               <thead>
                 <tr className="border-b border-line text-left text-muted">
                   <th className="px-4 py-3 font-normal">Nama</th>
+                  <th className="px-4 py-3 font-normal">Email</th>
                   <th className="px-4 py-3 font-normal">Telepon</th>
-                  <th className="px-4 py-3 font-normal">ABN</th>
                   <th className="px-4 py-3 font-normal">Access</th>
                   <th className="px-4 py-3"></th>
                 </tr>
@@ -127,9 +127,9 @@ export default function CustomerTable() {
               <tbody className="divide-y divide-line">
                 {customers.map((c) => (
                   <tr key={c.id} className="hover:bg-canvas">
-                    <td className="px-4 py-3 text-ink">{c.full_name}</td>
+                    <td className="px-4 py-3 text-ink">{c.full_name || <span className="italic text-muted">(belum diisi)</span>}</td>
+                    <td className="px-4 py-3 text-muted">{c.email ?? '-'}</td>
                     <td className="px-4 py-3 text-muted">{c.phone ?? '-'}</td>
-                    <td className="px-4 py-3 text-muted">{c.abn ?? '-'}</td>
                     <td className="px-4 py-3">
                       <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${c.access_suspended ? 'bg-danger/10 text-danger' : 'bg-success/10 text-success'}`}>
                         {c.access_suspended ? 'Suspended' : 'Active'}
@@ -154,7 +154,10 @@ export default function CustomerTable() {
         <div className="fixed inset-0 z-20 flex items-center justify-center bg-ink/20 px-4" onClick={() => setDetail(null)}>
           <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-lg border border-line bg-surface" onClick={(e) => e.stopPropagation()}>
             <div className="sticky top-0 flex items-center justify-between border-b border-line bg-surface px-5 py-4">
-              <h3 className="font-display font-semibold text-ink">Detail Customer</h3>
+              <div>
+                <h3 className="font-display font-semibold text-ink">Detail Customer</h3>
+                <p className="text-xs text-muted">{detail.email}</p>
+              </div>
               <button onClick={() => setDetail(null)} className="text-muted hover:text-ink">✕</button>
             </div>
 
