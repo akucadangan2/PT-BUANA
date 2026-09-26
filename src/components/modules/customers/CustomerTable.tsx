@@ -8,6 +8,7 @@ type Customer = {
   id: string; full_name: string; phone: string | null
   abn: string | null; delivery_note: string | null; billing_address: string | null
   access_suspended: boolean; created_at: string; customer_group_id: string | null
+  credit_term_days: number | null
 }
 type Group = { id: string; name: string; discount_percent: number }
 
@@ -23,7 +24,7 @@ export default function CustomerTable() {
   const [saving, setSaving] = useState(false)
   const [orderCount, setOrderCount] = useState<number | null>(null)
   const [groups, setGroups] = useState<Group[]>([])
-  const [form, setForm] = useState({ full_name: '', phone: '', abn: '', delivery_note: '', billing_address: '', customer_group_id: '' })
+  const [form, setForm] = useState({ full_name: '', phone: '', abn: '', delivery_note: '', billing_address: '', customer_group_id: '', credit_term_days: '' })
 
   async function load() {
     setLoading(true)
@@ -31,7 +32,7 @@ export default function CustomerTable() {
     const to = from + pageSize - 1
     let query = supabase
       .from('users')
-      .select('id, full_name, phone, abn, delivery_note, billing_address, access_suspended, created_at, customer_group_id', { count: 'exact' })
+      .select('id, full_name, phone, abn, delivery_note, billing_address, access_suspended, created_at, customer_group_id, credit_term_days', { count: 'exact' })
       .eq('role', 'customer')
       .order('full_name')
       .range(from, to)
@@ -56,7 +57,7 @@ export default function CustomerTable() {
     setForm({
       full_name: c.full_name, phone: c.phone ?? '', abn: c.abn ?? '',
       delivery_note: c.delivery_note ?? '', billing_address: c.billing_address ?? '',
-      customer_group_id: c.customer_group_id ?? '',
+      customer_group_id: c.customer_group_id ?? '', credit_term_days: c.credit_term_days ? String(c.credit_term_days) : '',
     })
     const { count } = await supabase.from('orders').select('id', { count: 'exact', head: true }).eq('customer_id', c.id)
     setOrderCount(count ?? 0)
@@ -65,7 +66,11 @@ export default function CustomerTable() {
   async function handleSave() {
     if (!detail) return
     setSaving(true)
-    await supabase.from('users').update({ ...form, customer_group_id: form.customer_group_id || null }).eq('id', detail.id)
+    await supabase.from('users').update({
+      ...form,
+      customer_group_id: form.customer_group_id || null,
+      credit_term_days: form.credit_term_days ? Number(form.credit_term_days) : null,
+    }).eq('id', detail.id)
     setSaving(false)
     setDetail(null)
     load()
@@ -175,11 +180,13 @@ export default function CustomerTable() {
                 <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-primary" />
               </div>
                 
-                <div>
-                <label className="mb-1 block text-xs font-medium text-muted">Customer Group</label>
-                <select value={form.customer_group_id} onChange={(e) => setForm({ ...form, customer_group_id: e.target.value })} className="w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-primary">
-                  <option value="">Tanpa grup (harga normal)</option>
-                  {groups.map((g) => <option key={g.id} value={g.id}>{g.name} ({g.discount_percent}% off)</option>)}
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted">Credit Terms</label>
+                <select value={form.credit_term_days} onChange={(e) => setForm({ ...form, credit_term_days: e.target.value })} className="w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-primary">
+                  <option value="">Bayar langsung (kartu, tanpa termin)</option>
+                  <option value="7">Net 7 hari</option>
+                  <option value="15">Net 15 hari</option>
+                  <option value="30">Net 30 hari</option>
                 </select>
               </div>
 

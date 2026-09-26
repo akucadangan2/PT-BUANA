@@ -9,8 +9,8 @@ import autoTable from 'jspdf-autotable'
 
 type OrderItem = { id: string; product_id: string; serial_number_id: string | null; qty: number; price: number; products: { name: string } | null }
 type Order = {
-  id: string; status: string; total: number; created_at: string; updated_at: string | null
-  delivery_address: string | null
+  id: string; customer_id: string; status: string; total: number; created_at: string; updated_at: string | null
+  delivery_address: string | null; payment_status: string | null; due_date: string | null
   users: { full_name: string; phone: string | null; abn: string | null; billing_address: string | null } | null
   order_items: OrderItem[]
 }
@@ -50,7 +50,7 @@ export default function OrderTable({ category }: { category: 'retail' | 'equipme
     const to = from + pageSize - 1
     let query = supabase
       .from('orders')
-      .select('id, status, total, created_at, updated_at, delivery_address, users!customer_id(full_name, phone, abn, billing_address), order_items(id, product_id, serial_number_id, qty, price, products(name))', { count: 'exact' })
+      .select('id, customer_id, status, total, created_at, updated_at, delivery_address, payment_status, due_date, users!customer_id(full_name, phone, abn, billing_address), order_items(id, product_id, serial_number_id, qty, price, products(name))', { count: 'exact' })
       .eq('category', category)
       .order('created_at', { ascending: false })
       .range(from, to)
@@ -93,6 +93,12 @@ export default function OrderTable({ category }: { category: 'retail' | 'equipme
         }
       }
     }
+  }
+
+  async function markAsPaid(orderId: string) {
+    await supabase.from('orders').update({ payment_status: 'paid' }).eq('id', orderId)
+    if (detailOrder?.id === orderId) setDetailOrder({ ...detailOrder, payment_status: 'paid' })
+    load()
   }
 
   async function updateStatus(orderId: string, status: string) {
@@ -380,6 +386,9 @@ export default function OrderTable({ category }: { category: 'retail' | 'equipme
                     <td className="px-4 py-3 text-ink">{formatPrice(o.total)}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-medium ${statusStyle[o.status]}`}>{statusLabel[o.status] ?? o.status}</span>
+                      {o.payment_status === 'invoiced' && (
+                        <span className="ml-1 inline-block rounded-full bg-amber-light px-2 py-1 text-xs font-medium text-amber">Invoiced</span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-muted">{new Date(o.created_at).toLocaleDateString('id-ID')}</td>
                     <td className="px-4 py-3 text-right">
@@ -472,6 +481,30 @@ export default function OrderTable({ category }: { category: 'retail' | 'equipme
                 <p className="text-sm font-medium text-ink">Total</p>
                 <p className="font-display text-lg font-semibold text-ink">{formatPrice(detailOrder.total)}</p>
               </div>
+
+              {detailOrder.payment_status === 'invoiced' && (
+                <div className="rounded-md border border-amber/30 bg-amber-light p-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-amber">Invoiced — Belum Lunas</p>
+                      {detailOrder.due_date && (
+                        <p className="text-xs text-amber">
+                          Jatuh tempo: {new Date(detailOrder.due_date).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}
+                          {new Date(detailOrder.due_date) < new Date() && ' — TERLAMBAT'}
+                        </p>
+                      )}
+                    </div>
+                    <button onClick={() => markAsPaid(detailOrder.id)} className="rounded-md bg-success px-3 py-1.5 text-xs font-medium text-white">
+                      Tandai Lunas
+                    </button>
+                  </div>
+                </div>
+              )}
+              {detailOrder.payment_status === 'paid' && (
+                <div className="rounded-md bg-success/10 px-3 py-2">
+                  <p className="text-sm font-medium text-success">✓ Lunas</p>
+                </div>
+              )}
 
               {totalCredited > 0 && (
                 <div className="flex items-center justify-between rounded-md bg-danger/5 px-3 py-2">
