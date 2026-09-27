@@ -21,7 +21,7 @@ function buildGroups(badges: Badges) {
         { label: 'Serial Numbers', href: '/admin/serial-number', badge: 0 },
         { label: 'Stock Count', href: '/admin/stok/opname', badge: 0 },
         { label: 'Stock History', href: '/admin/stok/movement', badge: 0 },
-        { label: 'Import Products', href: '/admin/produk/import', badge: 0 },
+        { label: 'Packing Boxes', href: '/admin/packing-boxes', badge: 0 },
       ],
     },
     {

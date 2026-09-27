@@ -10,6 +10,7 @@ type Product = {
   id: string; sku: string; name: string; description: string | null
   price: number; unit: string; stock_qty: number; low_stock_threshold: number
   image_url: string | null; subcategory: string | null
+  length_cm: number | null; width_cm: number | null; height_cm: number | null; weight_kg: number | null
 }
 
 export default function ProductTable({ category }: { category: 'retail' | 'equipment' }) {
@@ -27,7 +28,7 @@ export default function ProductTable({ category }: { category: 'retail' | 'equip
   const [uploading, setUploading] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<Product | null>(null)
-  const [form, setForm] = useState({ sku: '', name: '', description: '', price: 0, unit: 'pcs', stock_qty: 0, low_stock_threshold: 5, image_url: '', floor_price: '', subcategory: '' })
+  const [form, setForm] = useState({ sku: '', name: '', description: '', price: 0, unit: 'pcs', stock_qty: 0, low_stock_threshold: 5, image_url: '', floor_price: '', subcategory: '', length_cm: '', width_cm: '', height_cm: '', weight_kg: '' })
 
   async function load() {
     setLoading(true)
@@ -62,7 +63,7 @@ export default function ProductTable({ category }: { category: 'retail' | 'equip
 
   function openAdd() {
     setEditing(null)
-    setForm({ sku: '', name: '', description: '', price: 0, unit: 'pcs', stock_qty: 0, low_stock_threshold: 5, image_url: '', floor_price: '', subcategory: '' })
+    setForm({ sku: '', name: '', description: '', price: 0, unit: 'pcs', stock_qty: 0, low_stock_threshold: 5, image_url: '', floor_price: '', subcategory: '', length_cm: '', width_cm: '', height_cm: '', weight_kg: '' })
     setShowForm(true)
   }
 
@@ -73,13 +74,24 @@ export default function ProductTable({ category }: { category: 'retail' | 'equip
       stock_qty: p.stock_qty, low_stock_threshold: p.low_stock_threshold, image_url: p.image_url ?? '',
       floor_price: floorPrices[p.id] !== undefined ? String(floorPrices[p.id]) : '',
       subcategory: p.subcategory ?? '',
+      length_cm: p.length_cm !== null ? String(p.length_cm) : '',
+      width_cm: p.width_cm !== null ? String(p.width_cm) : '',
+      height_cm: p.height_cm !== null ? String(p.height_cm) : '',
+      weight_kg: p.weight_kg !== null ? String(p.weight_kg) : '',
     })
     setShowForm(true)
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const { floor_price: floorPriceValue, ...productForm } = form
+    const { floor_price: floorPriceValue, length_cm, width_cm, height_cm, weight_kg, ...rest } = form
+    const productForm = {
+      ...rest,
+      length_cm: length_cm.trim() !== '' ? Number(length_cm) : null,
+      width_cm: width_cm.trim() !== '' ? Number(width_cm) : null,
+      height_cm: height_cm.trim() !== '' ? Number(height_cm) : null,
+      weight_kg: weight_kg.trim() !== '' ? Number(weight_kg) : null,
+    }
     let productId = editing?.id
 
     if (editing) {
@@ -289,6 +301,15 @@ export default function ProductTable({ category }: { category: 'retail' | 'equip
                   onChange={(e) => setForm({ ...form, image_url: e.target.value })}
                   className="mt-2 w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-primary"
                 />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted">Dimensi & Berat (buat rekomendasi packing)</label>
+                <div className="grid grid-cols-4 gap-2">
+                  <input type="number" placeholder="P (cm)" value={form.length_cm} onChange={(e) => setForm({ ...form, length_cm: e.target.value })} className="rounded-md border border-line px-2 py-2 text-sm outline-none focus:border-primary" />
+                  <input type="number" placeholder="L (cm)" value={form.width_cm} onChange={(e) => setForm({ ...form, width_cm: e.target.value })} className="rounded-md border border-line px-2 py-2 text-sm outline-none focus:border-primary" />
+                  <input type="number" placeholder="T (cm)" value={form.height_cm} onChange={(e) => setForm({ ...form, height_cm: e.target.value })} className="rounded-md border border-line px-2 py-2 text-sm outline-none focus:border-primary" />
+                  <input type="number" placeholder="Kg" value={form.weight_kg} onChange={(e) => setForm({ ...form, weight_kg: e.target.value })} className="rounded-md border border-line px-2 py-2 text-sm outline-none focus:border-primary" />
+                </div>
               </div>
 
               <input type="number" placeholder="Ambang stok menipis" value={form.low_stock_threshold} onChange={(e) => setForm({ ...form, low_stock_threshold: Number(e.target.value) })} className="w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-primary" />

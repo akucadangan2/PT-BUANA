@@ -22,6 +22,10 @@ const TARGET_FIELDS: TargetField[] = [
   { key: 'stock_qty', label: 'Stok' },
   { key: 'low_stock_threshold', label: 'Ambang Stok Menipis' },
   { key: 'image_url', label: 'URL Gambar' },
+  { key: 'length_cm', label: 'Panjang (cm)' },
+  { key: 'width_cm', label: 'Lebar (cm)' },
+  { key: 'height_cm', label: 'Tinggi (cm)' },
+  { key: 'weight_kg', label: 'Berat (kg)' },
 ]
 
 function parseWarrantyMonths(value: any) {
@@ -85,7 +89,7 @@ export default function ImportProductsPage() {
 
       if (field.isWarranty) {
         product[field.key] = parseWarrantyMonths(raw)
-      } else if (field.key === 'price' || field.key === 'stock_qty' || field.key === 'low_stock_threshold') {
+      } else if (['price', 'stock_qty', 'low_stock_threshold', 'length_cm', 'width_cm', 'height_cm', 'weight_kg'].includes(field.key)) {
         product[field.key] = Number(raw) || 0
       } else {
         product[field.key] = String(raw).trim()

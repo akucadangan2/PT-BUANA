@@ -7,7 +7,8 @@ import { formatPrice } from '@/lib/format-price'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
-type OrderItem = { id: string; product_id: string; serial_number_id: string | null; qty: number; price: number; products: { name: string } | null }
+type OrderItem = { id: string; product_id: string; serial_number_id: string | null; qty: number; price: number; products: { name: string; length_cm: number | null; width_cm: number | null; height_cm: number | null; weight_kg: number | null } | null }
+type PackingBox = { id: string; name: string; length_cm: number; width_cm: number; height_cm: number; max_weight_kg: number | null }
 type Order = {
   id: string; customer_id: string; status: string; total: number; created_at: string; updated_at: string | null
   delivery_address: string | null; payment_status: string | null; due_date: string | null
@@ -39,6 +40,7 @@ export default function OrderTable({ category }: { category: 'retail' | 'equipme
   const [availableSerials, setAvailableSerials] = useState<Record<string, SerialOption[]>>({})
   const [generatingPdf, setGeneratingPdf] = useState(false)
   const [creditNotes, setCreditNotes] = useState<CreditNote[]>([])
+  const [packingBoxes, setPackingBoxes] = useState<PackingBox[]>([])
   const [showReturnForm, setShowReturnForm] = useState(false)
   const [returnQtys, setReturnQtys] = useState<Record<string, number>>({})
   const [returnReason, setReturnReason] = useState('')
@@ -50,7 +52,7 @@ export default function OrderTable({ category }: { category: 'retail' | 'equipme
     const to = from + pageSize - 1
     let query = supabase
       .from('orders')
-      .select('id, customer_id, status, total, created_at, updated_at, delivery_address, payment_status, due_date, users!customer_id(full_name, phone, abn, billing_address), order_items(id, product_id, serial_number_id, qty, price, products(name))', { count: 'exact' })
+      .select('id, customer_id, status, total, created_at, updated_at, delivery_address, payment_status, due_date, users!customer_id(full_name, phone, abn, billing_address), order_items(id, product_id, serial_number_id, qty, price, products(name, length_cm, width_cm, height_cm, weight_kg))', { count: 'exact' })
       .eq('category', category)
       .order('created_at', { ascending: false })
       .range(from, to)
@@ -73,6 +75,9 @@ export default function OrderTable({ category }: { category: 'retail' | 'equipme
   useEffect(() => { load() }, [category, page, pageSize, statusFilter])
   useEffect(() => { setPage(1) }, [category, statusFilter])
   useEffect(() => { loadCounts() }, [category])
+  useEffect(() => {
+    supabase.from('packing_boxes').select('*').order('length_cm').then(({ data }) => setPackingBoxes(data ?? []))
+  }, [])
 
   async function loadCreditNotes(orderId: string) {
     const { data } = await supabase.from('credit_notes').select('id, amount, reason, status, created_at').eq('order_id', orderId).order('created_at', { ascending: false })
@@ -331,6 +336,32 @@ export default function OrderTable({ category }: { category: 'retail' | 'equipme
   const totalAllCount = Object.values(counts).reduce((a, b) => a + b, 0)
   const totalCredited = creditNotes.reduce((sum, cn) => sum + cn.amount, 0)
 
+  function recommendBox(order: Order): { box: PackingBox | null; totalVolumeCm3: number; totalWeightKg: number; missingDimensions: boolean } {
+    let totalVolumeCm3 = 0
+    let totalWeightKg = 0
+    let missingDimensions = false
+
+    for (const item of order.order_items) {
+      const p = item.products
+      if (!p || p.length_cm == null || p.width_cm == null || p.height_cm == null) {
+        missingDimensions = true
+        continue
+      }
+      totalVolumeCm3 += p.length_cm * p.width_cm * p.height_cm * item.qty
+      totalWeightKg += (p.weight_kg ?? 0) * item.qty
+    }
+
+    // Asumsi efisiensi packing ~70% (barang gak pernah muat pas 100% volume box karena bentuk gak beraturan)
+    const requiredVolumeWithMargin = totalVolumeCm3 / 0.7
+
+    const fitting = packingBoxes
+      .filter((b) => b.length_cm * b.width_cm * b.height_cm >= requiredVolumeWithMargin)
+      .filter((b) => b.max_weight_kg == null || b.max_weight_kg >= totalWeightKg)
+      .sort((a, b) => a.length_cm * a.width_cm * a.height_cm - b.length_cm * b.width_cm * b.height_cm)
+
+    return { box: fitting[0] ?? null, totalVolumeCm3, totalWeightKg, missingDimensions }
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -481,6 +512,25 @@ export default function OrderTable({ category }: { category: 'retail' | 'equipme
                 <p className="text-sm font-medium text-ink">Total</p>
                 <p className="font-display text-lg font-semibold text-ink">{formatPrice(detailOrder.total)}</p>
               </div>
+
+              {(() => {
+                const rec = recommendBox(detailOrder)
+                return (
+                  <div className="rounded-md border border-line bg-canvas p-3">
+                    <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted">Rekomendasi Packing</p>
+                    {rec.missingDimensions && (
+                      <p className="mb-2 text-xs text-amber">⚠ Sebagian produk belum ada data dimensi — rekomendasi mungkin gak akurat</p>
+                    )}
+                    {rec.box ? (
+                      <p className="text-sm text-ink">
+                        Pakai box <span className="font-semibold">{rec.box.name}</span> ({rec.box.length_cm}×{rec.box.width_cm}×{rec.box.height_cm} cm) — total berat ~{rec.totalWeightKg.toFixed(1)} kg
+                      </p>
+                    ) : (
+                      <p className="text-sm text-danger">Gak ada box yang cukup — kemungkinan perlu lebih dari 1 box, atau tambah ukuran box baru</p>
+                    )}
+                  </div>
+                )
+              })()}
 
               {detailOrder.payment_status === 'invoiced' && (
                 <div className="rounded-md border border-amber/30 bg-amber-light p-3">
