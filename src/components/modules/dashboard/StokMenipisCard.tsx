@@ -5,13 +5,21 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 
 type LowStockItem = { id: string; name: string; category: 'retail' | 'equipment'; displayQty: number; threshold: number }
 
+function SingleLineTick({ x, y, payload }: any) {
+  return (
+    <text x={x} y={y} dy={4} textAnchor="end" fill="#667085" fontSize={11}>
+      {payload.value}
+    </text>
+  )
+}
+
 export default function StokMenipisCard({ items }: { items: LowStockItem[] }) {
   const [open, setOpen] = useState(false)
 
   const chartData = [...items]
     .sort((a, b) => a.displayQty - b.displayQty)
     .slice(0, 8)
-    .map((i) => ({ name: i.name.length > 14 ? i.name.slice(0, 14) + '…' : i.name, qty: i.displayQty, full: i.name }))
+    .map((i) => ({ name: i.name.length > 12 ? i.name.slice(0, 12) + '…' : i.name, qty: i.displayQty, full: i.name }))
 
   return (
     <>
@@ -27,10 +35,10 @@ export default function StokMenipisCard({ items }: { items: LowStockItem[] }) {
         {items.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted">All good, no low stock items</p>
         ) : (
-          <ResponsiveContainer width="100%" height={180}>
+          <ResponsiveContainer width="100%" height={220}>
             <BarChart data={chartData} layout="vertical" margin={{ left: 0, right: 16, top: 4, bottom: 4 }}>
               <XAxis type="number" hide />
-              <YAxis type="category" dataKey="name" width={100} tick={{ fill: '#667085', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis type="category" dataKey="name" width={100} tick={<SingleLineTick />} axisLine={false} tickLine={false} interval={0} />
               <Tooltip
                 formatter={(value: number, _name, entry) => [`${value} units`, entry.payload.full]}
                 cursor={{ fill: '#F7F8FA' }}
