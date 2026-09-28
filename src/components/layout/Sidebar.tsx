@@ -57,6 +57,7 @@ function buildGroups(badges: Badges) {
         { label: 'Customers', href: '/admin/customers', badge: 0 },
         { label: 'Customer Groups', href: '/admin/customer-groups', badge: 0 },
         { label: 'Vendor Payout', href: '/admin/vendor-payouts', badge: 0 },
+        { label: 'Download Ops App', href: '/ops-app', badge: 0, external: true },
       ],
     },
   ]
@@ -127,11 +128,20 @@ export default function Sidebar({ badges }: { badges: Badges }) {
                         <Link
                           key={item.href}
                           href={item.href}
+                          target={(item as any).external ? '_blank' : undefined}
+                          rel={(item as any).external ? 'noopener noreferrer' : undefined}
                           className={`flex items-center justify-between rounded-md px-3 py-2 text-sm transition-colors ${
                             active ? 'bg-primary-light font-medium text-primary' : 'text-ink/80 hover:bg-canvas'
                           }`}
                         >
-                          <span>{item.label}</span>
+                          <span className="flex items-center gap-1.5">
+                            {item.label}
+                            {(item as any).external && (
+                              <svg className="h-3 w-3 text-muted" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M7 13l6-6M8 7h5v5" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            )}
+                          </span>
                           {item.badge > 0 && (
                             <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-amber px-1.5 text-[11px] font-semibold text-white">
                               {item.badge}
