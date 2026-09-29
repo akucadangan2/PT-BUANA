@@ -7,24 +7,27 @@ export type AdminBadges = {
   retailPending: number
   equipmentPending: number
   serviceRequested: number
+  supportChatUnread: number
 }
 
 export function useAdminNotifications() {
-  const [badges, setBadges] = useState<AdminBadges>({ retailPending: 0, equipmentPending: 0, serviceRequested: 0 })
+  const [badges, setBadges] = useState<AdminBadges>({ retailPending: 0, equipmentPending: 0, serviceRequested: 0, supportChatUnread: 0 })
   const [notifPermission, setNotifPermission] = useState<NotificationPermission | 'unsupported'>('default')
   const supabaseRef = useRef(createClient())
 
   async function loadCounts() {
     const supabase = supabaseRef.current
-    const [retailRes, equipmentRes, serviceRes] = await Promise.all([
+    const [retailRes, equipmentRes, serviceRes, supportChatRes] = await Promise.all([
       supabase.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'pending').eq('category', 'retail'),
       supabase.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'pending').eq('category', 'equipment'),
       supabase.from('service_requests').select('id', { count: 'exact', head: true }).eq('status', 'requested'),
+      supabase.rpc('get_support_chat_unread_count'),
     ])
     setBadges({
       retailPending: retailRes.count ?? 0,
       equipmentPending: equipmentRes.count ?? 0,
       serviceRequested: serviceRes.count ?? 0,
+      supportChatUnread: (supportChatRes.data as number) ?? 0,
     })
   }
 
@@ -70,6 +73,13 @@ export function useAdminNotifications() {
         showBrowserNotification('Booking Service Baru', payload.new.complaint ?? 'Ada booking service baru', '/admin/service/booking')
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'service_requests' }, () => loadCounts())
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, (payload) => {
+        loadCounts()
+        if (payload.new.support_customer_id && payload.new.sender_id === payload.new.support_customer_id) {
+          showBrowserNotification('New Support Message', payload.new.message ?? 'A customer sent a message', '/admin/support-chat')
+        }
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'chat_messages' }, () => loadCounts())
       .subscribe()
 
     return () => {

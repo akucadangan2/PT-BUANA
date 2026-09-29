@@ -8,6 +8,7 @@ type Badges = {
   retailPending: number
   equipmentPending: number
   serviceRequested: number
+  supportChatUnread: number
 }
 
 function buildGroups(badges: Badges) {
@@ -58,7 +59,7 @@ function buildGroups(badges: Badges) {
         { label: 'Customer Groups', href: '/admin/customer-groups', badge: 0 },
         { label: 'Vendor Payout', href: '/admin/vendor-payouts', badge: 0 },
         { label: 'Download Ops App', href: '/ops-app', badge: 0, external: true },
-        { label: 'Support Chat', href: '/admin/support-chat', badge: 0 },
+        { label: 'Support Chat', href: '/admin/support-chat', badge: badges.supportChatUnread },
       ],
     },
   ]
