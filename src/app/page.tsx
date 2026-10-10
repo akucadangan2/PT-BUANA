@@ -1,4 +1,5 @@
-﻿import Link from 'next/link'
+﻿import type { CSSProperties } from 'react'
+import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { formatPrice } from '@/lib/format-price'
@@ -8,7 +9,7 @@ const PLAY_STORE_URL =
   'https://play.google.com/store/apps/details?id=com.buana.app'
 
 const APP_STORE_URL =
-  'https://apps.apple.com/app/buana/id0000000000'
+  'https://apps.apple.com/au/app/buana/id6815036658'
 
 const features = [
   {
@@ -29,7 +30,7 @@ const features = [
   {
     number: '04',
     title: 'Reliable Delivery',
-    desc: 'A connected delivery experience designed for businesses across Australia.',
+    desc: 'Delivery coverage for businesses in every state and territory in Australia.',
   },
   {
     number: '05',
@@ -131,6 +132,61 @@ const ToolIcon = () => (
   </svg>
 )
 
+const TruckIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    className="h-3.5 w-3.5"
+  >
+    <path d="M3 7h11v8H3z" />
+    <path d="M14 10h4l3 3v2h-7z" />
+    <circle cx="7" cy="18" r="1.6" />
+    <circle cx="17.5" cy="18" r="1.6" />
+  </svg>
+)
+
+// Globe with an orbiting courier icon — represents delivery coverage
+// across every state in Australia, not just one city.
+const GlobeOrbitBadge = () => (
+  <div className="relative mx-auto flex h-20 w-20 shrink-0 items-center justify-center sm:h-24 sm:w-24">
+    <style>{`
+      @keyframes buanaOrbit {
+        from { transform: rotate(0deg) translateX(var(--orbit-radius)) rotate(0deg); }
+        to { transform: rotate(360deg) translateX(var(--orbit-radius)) rotate(-360deg); }
+      }
+      .buana-orbit-track {
+        animation: buanaOrbit 7s linear infinite;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .buana-orbit-track { animation: none; }
+      }
+    `}</style>
+
+    {/* Globe body */}
+    <div className="absolute inset-2 overflow-hidden rounded-full bg-gradient-to-br from-[#3f7a43] to-[#16301a] shadow-inner">
+      <div className="absolute inset-0 rounded-full border border-white/15" />
+      <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-white/10" />
+      <div className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-white/10" />
+      <div className="absolute inset-[22%] rounded-full border border-white/10" />
+    </div>
+
+    {/* Orbit path */}
+    <div className="absolute inset-0 rounded-full border border-dashed border-white/20" />
+
+    {/* Orbiting courier icon */}
+    <div
+      className="buana-orbit-track absolute left-1/2 top-1/2 h-0 w-0"
+      style={{ '--orbit-radius': '38px' } as CSSProperties}
+    >
+      <div className="flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[#244c28] shadow-md">
+        <TruckIcon />
+      </div>
+    </div>
+  </div>
+)
+
 export default async function HomePage() {
   const supabase = await createClient()
 
@@ -216,7 +272,7 @@ export default async function HomePage() {
               <div>
                 <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#d6e1d3] bg-white/80 px-3.5 py-2 text-[9px] font-black uppercase tracking-[0.16em] text-[#37633b] shadow-sm sm:text-[10px]">
                   <span className="h-2 w-2 rounded-full bg-[#37633b]" />
-                  Built for Australian businesses
+                  Serving businesses in every state of Australia
                 </div>
 
                 <h1 className="max-w-3xl text-[43px] font-black leading-[0.98] tracking-[-0.055em] sm:text-6xl lg:text-[72px]">
@@ -228,9 +284,9 @@ export default async function HomePage() {
                 </h1>
 
                 <p className="mt-6 max-w-xl text-[15px] leading-7 text-[#667068] sm:mt-7 sm:text-[17px]">
-                  One connected platform for retail supply, commercial
-                  refrigeration equipment and professional field service.
-                  Designed to make everyday business operations simpler.
+                  One platform for retail supply, commercial refrigeration
+                  equipment and professional field service, available to
+                  businesses across Australia.
                 </p>
 
                 <div className="mt-8 grid gap-3 min-[460px]:flex sm:mt-9">
@@ -268,7 +324,7 @@ export default async function HomePage() {
                   <div>
                     <p className="text-base font-black sm:text-lg">AU</p>
                     <p className="mt-1 text-[9px] leading-4 text-[#7a837b] sm:text-[10px]">
-                      Business support
+                      Nationwide support
                     </p>
                   </div>
                 </div>
@@ -383,15 +439,15 @@ export default async function HomePage() {
                 </p>
 
                 <h2 className="mt-4 text-3xl font-black leading-tight tracking-[-0.045em] sm:text-4xl">
-                  More than
+                  Supply, equipment
                   <span className="block text-[#37633b]">
-                    a supplier.
+                    and service, together.
                   </span>
                 </h2>
 
                 <p className="mt-5 max-w-md text-sm leading-7 text-[#6b746c]">
-                  Buana connects essential supply, commercial equipment
-                  and after-sales support through one streamlined experience.
+                  Buana combines essential supply, commercial equipment
+                  and after-sales support in one platform.
                 </p>
               </div>
 
@@ -450,9 +506,8 @@ export default async function HomePage() {
                   </h3>
 
                   <p className="mt-3 max-w-xl text-sm leading-6 text-[#707971]">
-                    Request an experienced technician, monitor service
-                    progress and keep commercial equipment supported
-                    after purchase.
+                    Request a technician, track service progress and keep
+                    commercial equipment supported after purchase.
                   </p>
 
                   <a
@@ -477,11 +532,11 @@ export default async function HomePage() {
               <div className="grid gap-12 lg:grid-cols-[.85fr_1.15fr] lg:gap-20">
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#9fc297]">
-                    One connected journey
+                    How it works
                   </p>
 
                   <h2 className="mt-4 max-w-lg text-3xl font-black leading-tight tracking-[-0.045em] sm:text-4xl lg:text-5xl">
-                    Simple from
+                    Four steps,
                     <span className="block text-[#a9cb9f]">
                       start to finish.
                     </span>
@@ -489,7 +544,8 @@ export default async function HomePage() {
 
                   <p className="mt-5 max-w-lg text-sm leading-7 text-white/55 sm:text-base">
                     From placing an order to receiving a delivery or
-                    completing a service visit, Buana keeps the process clear.
+                    completing a service visit, Buana keeps every step
+                    visible.
                   </p>
 
                   <a
@@ -548,7 +604,7 @@ export default async function HomePage() {
 
               <p className="mt-3 max-w-xl text-sm leading-6 text-[#707971]">
                 Browse a selection of products currently available.
-                Open the Buana app to access the complete catalogue.
+                Open the Buana app for the complete catalogue.
               </p>
             </div>
           </ScrollReveal>
@@ -675,7 +731,7 @@ export default async function HomePage() {
                   </p>
 
                   <h2 className="mt-4 max-w-md text-3xl font-black leading-tight tracking-[-0.045em] sm:text-4xl">
-                    Built around everyday business needs.
+                    Built for everyday business needs.
                   </h2>
                 </div>
 
@@ -719,11 +775,20 @@ export default async function HomePage() {
 
                 {/* APP TEXT */}
                 <div>
-                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-[#b9d1b1] sm:text-[10px]">
-                    Buana Mobile
-                  </p>
+                  <div className="mb-5 flex items-center gap-4">
+                    <GlobeOrbitBadge />
 
-                  <h2 className="mt-4 max-w-2xl text-[34px] font-black leading-[1.03] tracking-[-0.045em] sm:mt-5 sm:text-4xl lg:text-5xl">
+                    <div>
+                      <p className="text-[9px] font-black uppercase tracking-[0.2em] text-[#b9d1b1] sm:text-[10px]">
+                        Buana Mobile
+                      </p>
+                      <p className="mt-1 text-xs font-bold text-white/70 sm:text-sm">
+                        Delivery and service available across Australia
+                      </p>
+                    </div>
+                  </div>
+
+                  <h2 className="max-w-2xl text-[34px] font-black leading-[1.03] tracking-[-0.045em] sm:text-4xl lg:text-5xl">
                     Your business,
                     <span className="block text-[#c4d9bc]">
                       wherever you are.
@@ -1022,8 +1087,8 @@ export default async function HomePage() {
               </h2>
 
               <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-[#707971] sm:text-base">
-                Discover retail products, commercial equipment and convenient
-                field service through one connected platform.
+                Retail products, commercial equipment and field service,
+                available through one platform across Australia.
               </p>
 
               <div className="mx-auto mt-8 grid max-w-md gap-3 min-[430px]:grid-cols-2">
