@@ -4,6 +4,12 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
+const PLAY_STORE_URL =
+  'https://play.google.com/store/apps/details?id=com.buana.app'
+
+const APP_STORE_URL =
+  'https://apps.apple.com/au/app/buana/id6815036658'
+
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -395,6 +401,28 @@ export default function LoginPage() {
                 </svg>
 
                 <span>Encrypted connection & restricted access</span>
+              </div>
+
+              <div className="mt-5 flex items-center justify-center gap-3 border-t border-line pt-5 text-xs">
+                <a
+                  href={PLAY_STORE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-muted transition-colors hover:text-primary"
+                >
+                  Get it on Google Play
+                </a>
+
+                <span className="text-line">•</span>
+
+                <a
+                  href={APP_STORE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-muted transition-colors hover:text-primary"
+                >
+                  Download on the App Store
+                </a>
               </div>
             </div>
           </section>
