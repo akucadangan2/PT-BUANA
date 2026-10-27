@@ -16,8 +16,8 @@ export default {
         muted: "#667085",
       },
       fontFamily: {
-        display: ["'Space Grotesk'", "sans-serif"],
-        sans: ["'Inter'", "sans-serif"],
+        display: ["'Space Grotesk'", "'Noto Sans Thai'", "sans-serif"],
+        sans: ["'Inter'", "'Noto Sans Thai'", "sans-serif"],
       },
     },
   },

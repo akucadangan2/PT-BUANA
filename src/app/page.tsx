@@ -4,68 +4,15 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { formatPrice } from '@/lib/format-price'
 import ScrollReveal from '@/components/ScrollReveal'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
+import { getDict } from '@/lib/i18n/server'
+import { storeBadges } from '@/lib/i18n/config'
 
 const PLAY_STORE_URL =
   'https://play.google.com/store/apps/details?id=com.buana.app'
 
 const APP_STORE_URL =
   'https://apps.apple.com/au/app/buana/id6815036658'
-
-const features = [
-  {
-    number: '01',
-    title: 'Real-Time Tracking',
-    desc: 'Track deliveries and technician visits from dispatch through to arrival.',
-  },
-  {
-    number: '02',
-    title: 'Equipment Warranty',
-    desc: 'Keep your commercial equipment purchases and warranty information organised.',
-  },
-  {
-    number: '03',
-    title: 'Service Booking',
-    desc: 'Request maintenance and equipment service directly through the Buana platform.',
-  },
-  {
-    number: '04',
-    title: 'Reliable Delivery',
-    desc: 'Delivery coverage for businesses in every state and territory in Australia.',
-  },
-  {
-    number: '05',
-    title: 'Direct Communication',
-    desc: 'Stay connected with your assigned courier or technician throughout the job.',
-  },
-  {
-    number: '06',
-    title: 'Secure Checkout',
-    desc: 'Simple and secure online payments for products and equipment.',
-  },
-]
-
-const process = [
-  {
-    number: '01',
-    title: 'Choose what you need',
-    desc: 'Browse retail products, commercial equipment or request a service.',
-  },
-  {
-    number: '02',
-    title: 'Order or book',
-    desc: 'Complete your order or schedule a technician through the Buana app.',
-  },
-  {
-    number: '03',
-    title: 'Track progress',
-    desc: 'Follow your delivery or service status with clear real-time updates.',
-  },
-  {
-    number: '04',
-    title: 'Delivered & supported',
-    desc: 'Receive your order and continue managing service from one platform.',
-  },
-]
 
 const SearchIcon = () => (
   <svg
@@ -188,6 +135,7 @@ const GlobeOrbitBadge = () => (
 )
 
 export default async function HomePage() {
+  const { lang, t } = await getDict()
   const supabase = await createClient()
 
   const [retailRes, equipmentRes] = await Promise.all([
@@ -210,7 +158,11 @@ export default async function HomePage() {
   const equipmentProducts = equipmentRes.data ?? []
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#f7f8f5] text-[#172018]">
+    <div
+      className={`min-h-screen overflow-x-hidden bg-[#f7f8f5] text-[#172018] ${
+        lang === 'th' ? 'lang-th' : ''
+      }`}
+    >
 
       {/* NAVBAR */}
       <header className="sticky top-0 z-50 border-b border-[#dfe5dc] bg-[#f7f8f5]/90 backdrop-blur-xl">
@@ -228,16 +180,16 @@ export default async function HomePage() {
 
           <nav className="hidden items-center gap-8 text-[13px] font-semibold text-[#536055] lg:flex">
             <a href="#services" className="transition hover:text-[#28542c]">
-              Services
+              {t.nav.services}
             </a>
             <a href="#products" className="transition hover:text-[#28542c]">
-              Products
+              {t.nav.products}
             </a>
             <a href="#how-it-works" className="transition hover:text-[#28542c]">
-              How It Works
+              {t.nav.how}
             </a>
             <a href="#app" className="transition hover:text-[#28542c]">
-              Mobile App
+              {t.nav.app}
             </a>
           </nav>
 
@@ -246,14 +198,16 @@ export default async function HomePage() {
               href="#products"
               className="hidden rounded-xl px-4 py-2.5 text-sm font-semibold text-[#536055] transition hover:bg-white sm:inline-flex"
             >
-              Catalogue
+              {t.nav.catalogue}
             </a>
+
+            <LanguageSwitcher lang={lang} />
 
             <Link
               href="/login"
               className="rounded-xl bg-[#244c28] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#193a1d] sm:px-5 sm:text-sm"
             >
-              Sign In
+              {t.nav.signIn}
             </Link>
           </div>
         </div>
@@ -272,21 +226,19 @@ export default async function HomePage() {
               <div>
                 <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#d6e1d3] bg-white/80 px-3.5 py-2 text-[9px] font-black uppercase tracking-[0.16em] text-[#37633b] shadow-sm sm:text-[10px]">
                   <span className="h-2 w-2 rounded-full bg-[#37633b]" />
-                  Serving businesses in every state of Australia
+                  {t.hero.badge}
                 </div>
 
                 <h1 className="max-w-3xl text-[43px] font-black leading-[0.98] tracking-[-0.055em] sm:text-6xl lg:text-[72px]">
-                  Supply.
+                  {t.hero.title[0]}
                   <br />
-                  Equipment.
+                  {t.hero.title[1]}
                   <br />
-                  <span className="text-[#37633b]">Service.</span>
+                  <span className="text-[#37633b]">{t.hero.title[2]}</span>
                 </h1>
 
                 <p className="mt-6 max-w-xl text-[15px] leading-7 text-[#667068] sm:mt-7 sm:text-[17px]">
-                  One platform for retail supply, commercial refrigeration
-                  equipment and professional field service, available to
-                  businesses across Australia.
+                  {t.hero.body}
                 </p>
 
                 <div className="mt-8 grid gap-3 min-[460px]:flex sm:mt-9">
@@ -294,7 +246,7 @@ export default async function HomePage() {
                     href="#products"
                     className="inline-flex min-h-[52px] items-center justify-center rounded-xl bg-[#244c28] px-6 text-sm font-bold text-white shadow-lg shadow-[#244c28]/15 transition hover:-translate-y-0.5 hover:bg-[#193a1d]"
                   >
-                    Explore Products
+                    {t.hero.cta1}
                     <span className="ml-2">→</span>
                   </a>
 
@@ -302,31 +254,19 @@ export default async function HomePage() {
                     href="#services"
                     className="inline-flex min-h-[52px] items-center justify-center rounded-xl border border-[#d8dfd5] bg-white px-6 text-sm font-bold text-[#263229] shadow-sm"
                   >
-                    Explore Services
+                    {t.hero.cta2}
                   </a>
                 </div>
 
                 <div className="mt-9 grid max-w-lg grid-cols-3 gap-3 border-t border-[#dde3da] pt-6 sm:gap-5">
-                  <div>
-                    <p className="text-base font-black sm:text-lg">400+</p>
-                    <p className="mt-1 text-[9px] leading-4 text-[#7a837b] sm:text-[10px]">
-                      Equipment models
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-base font-black sm:text-lg">Live</p>
-                    <p className="mt-1 text-[9px] leading-4 text-[#7a837b] sm:text-[10px]">
-                      Order tracking
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-base font-black sm:text-lg">AU</p>
-                    <p className="mt-1 text-[9px] leading-4 text-[#7a837b] sm:text-[10px]">
-                      Nationwide support
-                    </p>
-                  </div>
+                  {t.hero.stats.map((stat) => (
+                    <div key={stat.label}>
+                      <p className="text-base font-black sm:text-lg">{stat.value}</p>
+                      <p className="mt-1 text-[9px] leading-4 text-[#7a837b] sm:text-[10px]">
+                        {stat.label}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </ScrollReveal>
@@ -351,22 +291,22 @@ export default async function HomePage() {
                       <div className="flex items-center gap-2">
                         <span className="h-2 w-2 rounded-full bg-emerald-500" />
                         <span className="text-[8px] font-bold uppercase tracking-wider text-[#657066] sm:text-[9px]">
-                          Online
+                          {t.panel.online}
                         </span>
                       </div>
                     </div>
 
                     <div className="p-4 sm:p-6">
                       <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#8c958d] sm:text-[10px]">
-                        Business overview
+                        {t.panel.overview}
                       </p>
 
                       <h3 className="mt-2 text-xl font-black sm:text-2xl">
-                        Everything connected.
+                        {t.panel.title}
                       </h3>
 
                       <p className="mt-1 text-[10px] text-[#7a837b] sm:text-[11px]">
-                        Orders, equipment and service in one place.
+                        {t.panel.sub}
                       </p>
 
                       <div className="mt-5 grid grid-cols-2 gap-2.5 sm:gap-3">
@@ -376,10 +316,10 @@ export default async function HomePage() {
                           </div>
 
                           <p className="mt-5 text-[9px] font-bold uppercase tracking-wider text-[#909890]">
-                            Retail
+                            {t.panel.retailLabel}
                           </p>
                           <p className="mt-1 text-xs font-black sm:text-sm">
-                            Business Supply
+                            {t.panel.retailValue}
                           </p>
                         </div>
 
@@ -389,10 +329,10 @@ export default async function HomePage() {
                           </div>
 
                           <p className="mt-5 text-[9px] font-bold uppercase tracking-wider text-white/55">
-                            Equipment
+                            {t.panel.equipLabel}
                           </p>
                           <p className="mt-1 text-xs font-black sm:text-sm">
-                            Commercial Range
+                            {t.panel.equipValue}
                           </p>
                         </div>
 
@@ -400,16 +340,16 @@ export default async function HomePage() {
                           <div className="flex items-center justify-between gap-3">
                             <div>
                               <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-[#909890]">
-                                Current service
+                                {t.panel.current}
                               </p>
 
                               <p className="mt-1.5 text-xs font-black sm:text-sm">
-                                Equipment Maintenance
+                                {t.panel.currentValue}
                               </p>
                             </div>
 
                             <span className="shrink-0 rounded-full bg-[#edf4ea] px-2.5 py-1.5 text-[7px] font-black text-[#37633b] sm:text-[9px]">
-                              ON THE WAY
+                              {t.panel.status}
                             </span>
                           </div>
 
@@ -435,19 +375,18 @@ export default async function HomePage() {
             <div className="grid gap-10 lg:grid-cols-[.7fr_1.3fr] lg:gap-20">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#47704a]">
-                  What we do
+                  {t.svc.eyebrow}
                 </p>
 
                 <h2 className="mt-4 text-3xl font-black leading-tight tracking-[-0.045em] sm:text-4xl">
-                  Supply, equipment
+                  {t.svc.title[0]}
                   <span className="block text-[#37633b]">
-                    and service, together.
+                    {t.svc.title[1]}
                   </span>
                 </h2>
 
                 <p className="mt-5 max-w-md text-sm leading-7 text-[#6b746c]">
-                  Buana combines essential supply, commercial equipment
-                  and after-sales support in one platform.
+                  {t.svc.body}
                 </p>
               </div>
 
@@ -458,19 +397,18 @@ export default async function HomePage() {
                   </span>
 
                   <h3 className="mt-9 text-xl font-black">
-                    Retail Supply
+                    {t.svc.retail.title}
                   </h3>
 
                   <p className="mt-3 text-sm leading-6 text-[#707971]">
-                    Food, beverage and everyday products for convenient
-                    business ordering.
+                    {t.svc.retail.desc}
                   </p>
 
                   <a
                     href="#products"
                     className="mt-7 inline-flex text-xs font-black text-[#37633b]"
                   >
-                    Explore retail →
+                    {t.svc.retail.link}
                   </a>
                 </div>
 
@@ -480,19 +418,18 @@ export default async function HomePage() {
                   </span>
 
                   <h3 className="mt-9 text-xl font-black">
-                    Commercial Equipment
+                    {t.svc.equip.title}
                   </h3>
 
                   <p className="mt-3 text-sm leading-6 text-white/65">
-                    Refrigeration equipment from selected commercial
-                    brands for professional operations.
+                    {t.svc.equip.desc}
                   </p>
 
                   <a
                     href="#equipment"
                     className="mt-7 inline-flex text-xs font-black text-[#d4e7ca]"
                   >
-                    View equipment →
+                    {t.svc.equip.link}
                   </a>
                 </div>
 
@@ -502,19 +439,18 @@ export default async function HomePage() {
                   </span>
 
                   <h3 className="mt-8 text-xl font-black">
-                    Service & Maintenance
+                    {t.svc.service.title}
                   </h3>
 
                   <p className="mt-3 max-w-xl text-sm leading-6 text-[#707971]">
-                    Request a technician, track service progress and keep
-                    commercial equipment supported after purchase.
+                    {t.svc.service.desc}
                   </p>
 
                   <a
                     href="#app"
                     className="mt-6 inline-flex rounded-xl border border-[#d9e0d6] px-5 py-3 text-xs font-black text-[#37633b]"
                   >
-                    Book via app →
+                    {t.svc.service.link}
                   </a>
                 </div>
               </div>
@@ -532,38 +468,36 @@ export default async function HomePage() {
               <div className="grid gap-12 lg:grid-cols-[.85fr_1.15fr] lg:gap-20">
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#9fc297]">
-                    How it works
+                    {t.how.eyebrow}
                   </p>
 
                   <h2 className="mt-4 max-w-lg text-3xl font-black leading-tight tracking-[-0.045em] sm:text-4xl lg:text-5xl">
-                    Four steps,
+                    {t.how.title[0]}
                     <span className="block text-[#a9cb9f]">
-                      start to finish.
+                      {t.how.title[1]}
                     </span>
                   </h2>
 
                   <p className="mt-5 max-w-lg text-sm leading-7 text-white/55 sm:text-base">
-                    From placing an order to receiving a delivery or
-                    completing a service visit, Buana keeps every step
-                    visible.
+                    {t.how.body}
                   </p>
 
                   <a
                     href="#app"
                     className="mt-8 inline-flex rounded-xl bg-white px-6 py-3.5 text-xs font-black text-[#244c28]"
                   >
-                    Get the Buana App
+                    {t.how.cta}
                   </a>
                 </div>
 
                 <div className="border-t border-white/10">
-                  {process.map((item) => (
+                  {t.how.steps.map((item, index) => (
                     <div
-                      key={item.number}
+                      key={item.title}
                       className="grid gap-2 border-b border-white/10 py-6 sm:grid-cols-[70px_1fr_auto] sm:items-center"
                     >
                       <p className="text-xs font-black text-[#9fc297]">
-                        {item.number}
+                        {String(index + 1).padStart(2, '0')}
                       </p>
 
                       <div>
@@ -595,16 +529,15 @@ export default async function HomePage() {
           <ScrollReveal>
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#47704a]">
-                Catalogue
+                {t.prod.eyebrow}
               </p>
 
               <h2 className="mt-3 text-3xl font-black tracking-[-0.045em] sm:text-4xl">
-                Latest products.
+                {t.prod.title}
               </h2>
 
               <p className="mt-3 max-w-xl text-sm leading-6 text-[#707971]">
-                Browse a selection of products currently available.
-                Open the Buana app for the complete catalogue.
+                {t.prod.body}
               </p>
             </div>
           </ScrollReveal>
@@ -613,14 +546,14 @@ export default async function HomePage() {
           <div className="mt-10 sm:mt-12">
             <div className="mb-5 flex items-end justify-between border-b border-[#dce2d9] pb-4">
               <div>
-                <p className="text-lg font-black">Retail</p>
+                <p className="text-lg font-black">{t.prod.retailTitle}</p>
                 <p className="mt-1 text-[11px] text-[#818a82]">
-                  Food & beverage supply
+                  {t.prod.retailSub}
                 </p>
               </div>
 
               <p className="hidden text-[9px] font-black uppercase tracking-[0.18em] text-[#a0a7a0] min-[400px]:block">
-                Latest arrivals
+                {t.prod.latest}
               </p>
             </div>
 
@@ -642,7 +575,7 @@ export default async function HomePage() {
                         )}
 
                         <div className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-1 text-[7px] font-black uppercase text-[#526054]">
-                          Retail
+                          {t.prod.retailTag}
                         </div>
                       </div>
 
@@ -661,7 +594,7 @@ export default async function HomePage() {
               </div>
             ) : (
               <div className="rounded-3xl border border-dashed border-[#ccd5c9] bg-white px-6 py-12 text-center text-sm font-black text-[#536055]">
-                Retail products coming soon.
+                {t.prod.retailEmpty}
               </div>
             )}
           </div>
@@ -669,9 +602,9 @@ export default async function HomePage() {
           {/* EQUIPMENT */}
           <div id="equipment" className="mt-14 sm:mt-16">
             <div className="mb-5 border-b border-[#dce2d9] pb-4">
-              <p className="text-lg font-black">Equipment</p>
+              <p className="text-lg font-black">{t.prod.equipTitle}</p>
               <p className="mt-1 text-[11px] text-[#818a82]">
-                Commercial refrigeration
+                {t.prod.equipSub}
               </p>
             </div>
 
@@ -714,7 +647,7 @@ export default async function HomePage() {
               </div>
             ) : (
               <div className="rounded-3xl border border-dashed border-[#ccd5c9] bg-white px-6 py-12 text-center text-sm font-black text-[#536055]">
-                Equipment catalogue coming soon.
+                {t.prod.equipEmpty}
               </div>
             )}
           </div>
@@ -727,22 +660,22 @@ export default async function HomePage() {
               <div className="grid gap-10 lg:grid-cols-[.7fr_1.3fr] lg:gap-20">
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#47704a]">
-                    Why Buana
+                    {t.feat.eyebrow}
                   </p>
 
                   <h2 className="mt-4 max-w-md text-3xl font-black leading-tight tracking-[-0.045em] sm:text-4xl">
-                    Built for everyday business needs.
+                    {t.feat.title}
                   </h2>
                 </div>
 
                 <div className="grid sm:grid-cols-2">
-                  {features.map((feature) => (
+                  {t.feat.items.map((feature, index) => (
                     <div
-                      key={feature.number}
+                      key={feature.title}
                       className="border-b border-[#e2e7df] py-6 sm:px-6 sm:[&:nth-child(odd)]:border-r"
                     >
                       <p className="text-[9px] font-black tracking-[0.2em] text-[#87a184]">
-                        {feature.number}
+                        {String(index + 1).padStart(2, '0')}
                       </p>
 
                       <p className="mt-4 text-sm font-black">
@@ -780,25 +713,23 @@ export default async function HomePage() {
 
                     <div>
                       <p className="text-[9px] font-black uppercase tracking-[0.2em] text-[#b9d1b1] sm:text-[10px]">
-                        Buana Mobile
+                        {t.app.eyebrow}
                       </p>
                       <p className="mt-1 text-xs font-bold text-white/70 sm:text-sm">
-                        Delivery and service available across Australia
+                        {t.app.sub}
                       </p>
                     </div>
                   </div>
 
                   <h2 className="max-w-2xl text-[34px] font-black leading-[1.03] tracking-[-0.045em] sm:text-4xl lg:text-5xl">
-                    Your business,
+                    {t.app.title[0]}
                     <span className="block text-[#c4d9bc]">
-                      wherever you are.
+                      {t.app.title[1]}
                     </span>
                   </h2>
 
                   <p className="mt-5 max-w-lg text-sm leading-7 text-white/65 sm:text-base">
-                    Browse products, order equipment, track deliveries,
-                    request service and manage your Buana activity directly
-                    from your phone.
+                    {t.app.body}
                   </p>
 
                   <div className="mt-7 grid max-w-[390px] grid-cols-1 gap-2.5 min-[390px]:grid-cols-2 sm:mt-8">
@@ -809,8 +740,8 @@ export default async function HomePage() {
                       className="flex h-[58px] items-center justify-center overflow-hidden rounded-xl bg-black px-3 transition duration-300 hover:-translate-y-1"
                     >
                       <Image
-                        src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
-                        alt="Get it on Google Play"
+                        src={storeBadges[lang].play}
+                        alt={t.app.playAlt}
                         width={170}
                         height={50}
                         unoptimized
@@ -825,8 +756,8 @@ export default async function HomePage() {
                       className="flex h-[58px] items-center justify-center rounded-xl bg-black px-3 transition duration-300 hover:-translate-y-1"
                     >
                       <Image
-                        src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us"
-                        alt="Download on the App Store"
+                        src={storeBadges[lang].apple}
+                        alt={t.app.appleAlt}
                         width={150}
                         height={50}
                         unoptimized
@@ -836,26 +767,14 @@ export default async function HomePage() {
                   </div>
 
                   <div className="mt-8 grid max-w-md grid-cols-3 gap-2 border-t border-white/10 pt-6 sm:gap-4">
-                    <div>
-                      <p className="text-sm font-black">Shop</p>
-                      <p className="mt-1 text-[9px] text-white/45">
-                        Retail products
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-sm font-black">Track</p>
-                      <p className="mt-1 text-[9px] text-white/45">
-                        Live updates
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-sm font-black">Service</p>
-                      <p className="mt-1 text-[9px] text-white/45">
-                        Book technicians
-                      </p>
-                    </div>
+                    {t.app.points.map((point) => (
+                      <div key={point.title}>
+                        <p className="text-sm font-black">{point.title}</p>
+                        <p className="mt-1 text-[9px] text-white/45">
+                          {point.sub}
+                        </p>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -884,7 +803,7 @@ export default async function HomePage() {
                         {/* APP HEADER */}
                         <div className="flex items-center justify-between bg-white px-5 pb-4 pt-3">
                           <p className="text-[18px] font-black tracking-[-0.04em] text-[#172033]">
-                            Retail Products
+                            {t.mock.title}
                           </p>
 
                           <div className="flex items-center gap-4 text-[#172033]">
@@ -917,28 +836,25 @@ export default async function HomePage() {
                             <SearchIcon />
 
                             <span className="text-[13px] tracking-wide text-[#697079]">
-                              Search products...
+                              {t.mock.search}
                             </span>
                           </div>
                         </div>
 
                         {/* CATEGORIES */}
                         <div className="flex gap-2 overflow-hidden border-b border-[#e4e8eb] bg-white px-4 py-2.5">
-                          <span className="shrink-0 rounded-full border border-[#d9dee4] px-3 py-2 text-[9px] font-semibold text-[#718096]">
-                            All
-                          </span>
-
-                          <span className="shrink-0 rounded-full bg-[#11847d] px-4 py-2 text-[9px] font-semibold text-white">
-                            Accessories
-                          </span>
-
-                          <span className="shrink-0 rounded-full border border-[#d9dee4] px-3 py-2 text-[9px] font-semibold text-[#718096]">
-                            Beverages
-                          </span>
-
-                          <span className="shrink-0 rounded-full border border-[#d9dee4] px-3 py-2 text-[9px] font-semibold text-[#718096]">
-                            Branding
-                          </span>
+                          {t.mock.categories.map((category, i) => (
+                            <span
+                              key={category}
+                              className={
+                                i === 1
+                                  ? 'shrink-0 rounded-full bg-[#11847d] px-4 py-2 text-[9px] font-semibold text-white'
+                                  : 'shrink-0 rounded-full border border-[#d9dee4] px-3 py-2 text-[9px] font-semibold text-[#718096]'
+                              }
+                            >
+                              {category}
+                            </span>
+                          ))}
                         </div>
 
                         {/* PRODUCTS */}
@@ -995,7 +911,7 @@ export default async function HomePage() {
                               <StoreIcon />
                             </div>
                             <p className="mt-1 text-[7px] font-medium">
-                              Retail
+                              {t.mock.retail}
                             </p>
                           </div>
 
@@ -1004,7 +920,7 @@ export default async function HomePage() {
                               <BoxIcon />
                             </div>
                             <p className="mt-1 text-[7px]">
-                              Equipment
+                              {t.mock.equipment}
                             </p>
                           </div>
 
@@ -1025,7 +941,7 @@ export default async function HomePage() {
                               </svg>
                             </div>
                             <p className="mt-1 text-[7px]">
-                              Orders
+                              {t.mock.orders}
                             </p>
                           </div>
 
@@ -1034,7 +950,7 @@ export default async function HomePage() {
                               <ToolIcon />
                             </div>
                             <p className="mt-1 text-[7px]">
-                              Service
+                              {t.mock.service}
                             </p>
                           </div>
 
@@ -1052,7 +968,7 @@ export default async function HomePage() {
                               </svg>
                             </div>
                             <p className="mt-1 text-[7px]">
-                              Profile
+                              {t.mock.profile}
                             </p>
                           </div>
                         </div>
@@ -1079,16 +995,15 @@ export default async function HomePage() {
           <ScrollReveal>
             <div className="mx-auto max-w-4xl border-t border-[#dce2d9] pt-14 text-center sm:pt-16">
               <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#47704a]">
-                BUANA Australia
+                {t.cta.eyebrow}
               </p>
 
               <h2 className="mt-4 text-3xl font-black tracking-[-0.045em] sm:text-4xl">
-                Everything your operation needs.
+                {t.cta.title}
               </h2>
 
               <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-[#707971] sm:text-base">
-                Retail products, commercial equipment and field service,
-                available through one platform across Australia.
+                {t.cta.body}
               </p>
 
               <div className="mx-auto mt-8 grid max-w-md gap-3 min-[430px]:grid-cols-2">
@@ -1096,14 +1011,14 @@ export default async function HomePage() {
                   href="#products"
                   className="inline-flex min-h-[50px] items-center justify-center rounded-xl bg-[#244c28] px-6 text-sm font-bold text-white"
                 >
-                  Browse Products
+                  {t.cta.browse}
                 </a>
 
                 <a
                   href="#app"
                   className="inline-flex min-h-[50px] items-center justify-center rounded-xl border border-[#d4dcd2] bg-white px-6 text-sm font-bold text-[#314034]"
                 >
-                  Download the App
+                  {t.cta.download}
                 </a>
               </div>
             </div>
@@ -1126,43 +1041,42 @@ export default async function HomePage() {
               />
 
               <p className="mt-5 max-w-[270px] text-xs leading-5 text-[#7a837b]">
-                Retail, commercial equipment and field service connected
-                through one Buana platform.
+                {t.foot.tagline}
               </p>
             </div>
 
             <div>
               <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#9ba29b]">
-                Explore
+                {t.foot.explore}
               </p>
 
               <div className="mt-5 flex flex-col gap-3 text-sm font-semibold text-[#626d64]">
-                <a href="#products">Products</a>
-                <a href="#equipment">Equipment</a>
-                <a href="#services">Services</a>
-                <a href="#app">Mobile App</a>
+                <a href="#products">{t.foot.products}</a>
+                <a href="#equipment">{t.foot.equipment}</a>
+                <a href="#services">{t.foot.services}</a>
+                <a href="#app">{t.foot.app}</a>
               </div>
             </div>
 
             <div>
               <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#9ba29b]">
-                Legal
+                {t.foot.legal}
               </p>
 
               <div className="mt-5 flex flex-col gap-3 text-sm font-semibold text-[#626d64]">
                 <Link href="/privacy">
-                  Privacy Policy
+                  {t.foot.privacy}
                 </Link>
 
                 <Link href="/delete-account">
-                  Account Deletion
+                  {t.foot.deleteAccount}
                 </Link>
               </div>
             </div>
 
             <div>
               <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#9ba29b]">
-                Account
+                {t.foot.account}
               </p>
 
               <div className="mt-5 flex flex-col gap-3 text-sm font-semibold text-[#626d64]">
@@ -1171,7 +1085,7 @@ export default async function HomePage() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Google Play
+                  {t.foot.play}
                 </a>
 
                 <a
@@ -1179,11 +1093,11 @@ export default async function HomePage() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  App Store
+                  {t.foot.apple}
                 </a>
 
                 <Link href="/login">
-                  Staff Login
+                  {t.foot.staff}
                 </Link>
               </div>
             </div>
@@ -1191,11 +1105,11 @@ export default async function HomePage() {
 
           <div className="mt-10 flex flex-col gap-2 border-t border-[#e0e5dd] pt-6 text-[10px] font-medium text-[#9ba29b] sm:mt-12 sm:flex-row sm:items-center sm:justify-between">
             <p>
-              © {new Date().getFullYear()} BUANA. All rights reserved.
+              {t.foot.copy.replace('{year}', String(new Date().getFullYear()))}
             </p>
 
             <p>
-              Retail • Equipment • Service • Australia
+              {t.foot.line}
             </p>
           </div>
         </div>

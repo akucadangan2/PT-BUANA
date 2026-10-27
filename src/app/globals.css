@@ -1,3 +1,23 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Thai text: no negative or wide letter spacing, taller headings, no tiny text.
+   Applied only on public pages that carry the lang-th class. */
+.lang-th [class*='tracking-'] {
+  letter-spacing: normal;
+}
+.lang-th h1,
+.lang-th h2,
+.lang-th h3 {
+  line-height: 1.3;
+}
+.lang-th [class*='text-[7px]'],
+.lang-th [class*='text-[8px]'],
+.lang-th [class*='text-[9px]'] {
+  font-size: 11px;
+}
+.lang-th [class*='text-[10px]'],
+.lang-th [class*='text-[11px]'] {
+  font-size: 12px;
+}
